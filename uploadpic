@@ -1,0 +1,17 @@
+#!/bin/sh
+
+server="root@0x01f.com:/var/www/images/"
+
+if [ $# == 0 ]; then
+	echo "Usage: uploadpic [file1 file2 ...]"
+else
+	for file in "$@"; do
+		if [ ! -f "$file" ]; then
+			echo "Error: $file donot exist!"
+		else
+			echo "Upload: $file!"
+			scp $file $server$file
+		fi
+	done
+fi
+

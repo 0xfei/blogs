@@ -1,0 +1,7 @@
+#!/bin/sh
+
+server="0x01f.com"
+name="root"
+
+ssh $name@$server
+

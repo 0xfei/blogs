@@ -1,0 +1,15 @@
+baseurl = "http://0x01f.com/"
+languageCode = "en-us"
+title = "0x01f"
+theme = "detox"
+
+contentdir = "content"
+layoutdir = "layouts"
+publishdir = "public"
+
+buildDrafts = true
+buildFuture = true
+
+[Params]
+	author = "0x01f"
+	description = "Ma' in wojel ba'ax ka lelo' u k'áat u ya'al"
