@@ -1,3 +1,3 @@
 #!/bin/sh
 
-hugo server -d dev
+hugo server -d dev --watch
