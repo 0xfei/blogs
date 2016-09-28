@@ -12,6 +12,7 @@ ngx_basic:
 5. ngx_string.c ngx_string.h
 6. ngx_rbtree.c ngx_rbtree.h
 7. ngx_radix_tree.c ngx_radix_tree.h
+8. ngx_hash.c ngx_hash.h
 
 ngx_system_about:
 1. ngx_errno.c ngx_errno.h
