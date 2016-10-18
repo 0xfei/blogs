@@ -21,3 +21,29 @@ sudo docker run -it -d -p 80:80 --name web_site -v `pwd`/public:/var/www/public 
 
 ```
 
+因为是静态网站，我的发布形式很野蛮——打包之后远程传到服务器再解包。由于中间把public目录删除了，所以容器找不到数据卷。修改auto_push.sh脚本就行。
+
+
+```
+#!/bin/bash
+
+echo "Push public/* to 0x01f.com !"
+
+echo "Start pushing..."
+
+filename="1.tar.gz"
+origfiles="public/*"
+remote="root@0x01f.com:/var/www/"
+sshdir="/var/www/"
+# Do not execute `rm -rf public`
+cmd="cd ${sshdir}; tar -xzf $filename -C $sshdir; rm $filename"
+
+tar -czf $filename $origfiles
+scp $filename $remote
+ssh root@0x01f.com $cmd
+
+echo "Remove $filename."
+rm $filename
+
+echo "Done!"
+```

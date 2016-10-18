@@ -8,7 +8,8 @@ filename="1.tar.gz"
 origfiles="public/*"
 remote="root@0x01f.com:/var/www/"
 sshdir="/var/www/"
-cmd="cd ${sshdir}; rm -rf public; tar -xzf $filename -C $sshdir; rm $filename"
+# Do not execute `rm -rf public`
+cmd="cd ${sshdir}; tar -xzf $filename -C $sshdir; rm $filename"
 
 tar -czf $filename $origfiles
 scp $filename $remote
