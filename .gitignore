@@ -3,4 +3,5 @@ public/*
 
 # dev
 dev/*
+nginx_log/*.log
 
