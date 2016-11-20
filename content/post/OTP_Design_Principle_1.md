@@ -200,22 +200,22 @@ Erlang/OTP附带很多组件，每个都有特定的功能。这些组件在Erla
 
 创建进程的应用很容易利用标准行为模式实现监控树模型。
 
-如何编写应用会在*Applications*章节提供。
+如何编写应用会在 *Applications* 章节提供。
 
 ##### 9.1.4 发行（Releases）
 
-一个版本发行（release）是由Erlang/OTP应用子集和一组用户应用组成的完整系统。*Releases*章节详细介绍。
+一个版本发行（release）是由Erlang/OTP应用子集和一组用户应用组成的完整系统。 *Releases* 章节详细介绍。
 
 ##### 9.1.5 版本控制（Release Handling）
 
-版本控制是指对在一个系统中对某应用升级或者降低版本。*Release Handling*章节详细介绍这部分内容。
+版本控制是指对在一个系统中对某应用升级或者降低版本。 *Release Handling* 章节详细介绍这部分内容。
 
 
 
 
 #### 9.2 gen_server 行为模式
 
-这一章节结合*stdlib* man page中的*gen_server(3)*阅读，man page中详细介绍了gen_server行为模式的接口函数和回调函数。
+这一章节结合 *stdlib* man page中的 *gen_server(3)* 阅读，man page中详细介绍了gen_server行为模式的接口函数和回调函数。
 
 ##### 9.2.1 C/S架构
 
@@ -223,7 +223,7 @@ C/S架构有一个中心服务器以及任意数量的客户端，客户端-服�
 
 ##### 9.2.2 一个例子
 
-在前一节*Overview*中展示的纯Erlang编写的服务器可以用gen_server行为模式实现，下面的ch3.erl实现了回调模块：
+在前一节 *Overview* 中展示的纯Erlang编写的服务器可以用gen_server行为模式实现，下面的ch3.erl实现了回调模块：
 
 ```
 -module(ch3).
@@ -266,7 +266,7 @@ start_link调用gen_server:start_link/4，它创建并链接一个新的进程�
 * 第一个参数，{local, ch3}，进程名，表示在本地注册ch3；如果省略名字，gen_server不会注册，因此要用到Pid。name也可以是{global, Name}的形式，这样的话gen_server调用global:register_name/2注册。
 * 第二个参数，ch3，回调模块名，表示回调函数所在的模块文件。这个例子中，接口函数（start_link alloc和free）跟回调函数（init handle_call 和 handle_cast）在同一个模块。这是良好的编程习惯，将进程和模块文件关联起来，一个模块文件对应一组进程。
 * 第三个参数，[]，是gen_server模式回调init是传入的参数；这里的init不需要参数，因此传入空列表。
-* 第四个参数，[]，是gen_server的可选参数，*gen_server(3)*的man page有详细说明。
+* 第四个参数，[]，是gen_server的可选参数， *gen_server(3)* 的man page有详细说明。
 
 如果进程名注册成功，gen_server会调用ch3:init([])，init应当返回{ok, State}，State是gen_server进程的内部状态，活跃在整个生命周期。这个例子中是有效的channel。
 
@@ -328,7 +328,7 @@ handle_cast({free,Ch}, Chs) ->
 
 ###### gen_server监控树中
 
-如果gen_server进程是监控树的一部分，不需要提供专门的stop函数。会被监控进程supervisor自动终止。终止策略通过在监控进程中设置*shutdown strategy*实现。（补充：后面的supervisor章节会有更详细的说明）
+如果gen_server进程是监控树的一部分，不需要提供专门的stop函数。会被监控进程supervisor自动终止。终止策略通过在监控进程中设置 *shutdown strategy* 实现。（补充：后面的supervisor章节会有更详细的说明）
 
 如果在进程退出之前需要清理资源，那么终止策略必须是一个超时值，而且gen_server进程要在init中设置为系统进程——通过捕捉exit信号。这样当终止时，gen_server会回调terminate(shutdown, State)函数。
 
@@ -396,7 +396,7 @@ code_change(OldVsn, State, Extra) ->
 
 *注意：在新代码中应该使用新行为模式gen_statem替换gen_fsm，gen_statem添加了更丰富的功能。为了确保老机器上的代码正常运行，gen_fsm模块在可见的未来不会被移除。*
 
-这一章节结合*stdlib* man page中的*gen_fsm(3)*阅读，man page中详细介绍了gen_fsm行为模式的接口函数和回调函数。
+这一章节结合 *stdlib* man page中的 *gen_fsm(3)* 阅读，man page中详细介绍了gen_fsm行为模式的接口函数和回调函数。
 
 ##### 9.3.1 有限状态机
 
@@ -471,9 +471,9 @@ start_link通过调用gen_fsm:start_link/4，创建并链接一个新的进程�
 * 第一个参数，{local, code_lock}，进程名，表示在本地注册code_lock；如果省略名字，gen_fsm进程没有注册，因此要用到Pid。name也可以是{global, Name}的形式，这样的话gen_fsm调用global:register_name/2注册。
 * 第二个参数，code_lock，回调模块名，表示回调函数所在的模块文件。这个例子中，接口函数（start_link和button）跟回调函数（init locked 和 open）在同一个模块。这是良好的编程习惯，将进程和模块文件关联起来，一个模块文件对应一组进程。
 * 第三个参数，Code，是一组数字，反转之后传给init，init初始化时有正确的密码。
-* 第四个参数，[]，一组可选选项，*gen_fsm(3)*的man page有详细说明。
+* 第四个参数，[]，一组可选选项， *gen_fsm(3)* 的man page有详细说明。
 
-如果进程名注册成功，新的gen_fsm进程会调用回调函数code_lock:init(Code)，init应当返回{ok, StateName, StateData}，StateName是gen_fsm的初始状态。这个例子中是*locked*，假设门刚开始处于锁状态。StateData是gen_fsm的内部状态。（对于gen_fsm，内部状态通常称作'状态数据'以此区分状态机的状态）。这个例子中，状态数据是目前为止的按钮序列——开始是空，Code时表示可以状态转换。
+如果进程名注册成功，新的gen_fsm进程会调用回调函数code_lock:init(Code)，init应当返回{ok, StateName, StateData}，StateName是gen_fsm的初始状态。这个例子中是 *locked* ，假设门刚开始处于锁状态。StateData是gen_fsm的内部状态。（对于gen_fsm，内部状态通常称作'状态数据'以此区分状态机的状态）。这个例子中，状态数据是目前为止的按钮序列——开始是空，Code时表示可以状态转换。
 
 ```
 init(Code) ->
@@ -551,7 +551,7 @@ handle_event(stop, _StateName, StateData) ->
 
 ###### 在监控树中
 
-如果gen_fsm进程是监控树的一部分，不需要提供专门的stop函数。gen_fsm进程会被它的监控进程supervisor自动终止。具体如何终止通过在监控进程中设置*shutdown strategy*实现。
+如果gen_fsm进程是监控树的一部分，不需要提供专门的stop函数。gen_fsm进程会被它的监控进程supervisor自动终止。具体如何终止通过在监控进程中设置 *shutdown strategy* 实现。
 
 如果在进程退出之前需要清理资源，那么终止策略必须是一个超时值，而且gen_fsm进程要在init中设置为系统进程——通过捕捉exit信号。这样当终止时，gen_fsm框架会回调terminate(shutdown, StateName, StateData)函数:
 
