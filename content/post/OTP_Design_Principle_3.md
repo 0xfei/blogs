@@ -8,215 +8,231 @@ topics = ["Erlang/OTP", "translation"]
 +++
 
 
-#### 9.3 gen_fsm 行为模式
+#### 9.5 gen_event 行为模式
 
-*注意：在新代码中应该使用新行为模式gen_statem替换gen_fsm，gen_statem添加了更丰富的功能。为了确保老机器上的代码正常运行，gen_fsm模块在可见的未来不会被移除。*
+这一章节结合 *stdlib* man page中的 *gen_event(3)* 阅读，man page中详细介绍了gen_event行为模式的接口函数和回调函数。
 
-这一章节结合*stdlib* man page中的*gen_fsm(3)*阅读，man page中详细介绍了gen_fsm行为模式的接口函数和回调函数。
+##### 9.5.1 事件处理原则
 
-##### 9.3.1 有限状态机
+在OTP中，事件管理器是一个可以接收并记录事件的命名对象。错误、警告和其他信息都是可以被记录的事件。
 
-有限状态机（FSM）可以被描述为如下形式的关系组：
+在事件管理器中，可以安装一个或多个事件处理模块。当事件处理器接收到事件通知时，所有安装的事件处理模块会处理这个事件。例如，处理错误的事件管理器默认有一个事件处理器，它会把错误日志写到终端。如果特定时期的错误信息需要保存到文件中，那么用户可以安装一个事件处理器来做这件事。当不需要写入文件时，这个事件处理器可以被删除。
 
-```
-State(S) x Event(E) -> Actions(A), State(S')
-```
+事件管理器可以用进程的形式实现，而事件管理器可以实现它的回调模块。
 
-这组关系可以这样理解：
+事件管理器内部维护一个{Module, State}列表，每个Module是一个事件处理器，State是事件处理器的内部状态。
 
-* 如果当前状态是S，并且事件E发生，那么我们将执行行为A然后转移到状态S'。
+##### 9.5.2 例子
 
-对于一个gen_fsm行为模式实现的有限状态机，状态转移规则写成一组Erlang转换函数，类似下面的转换：
+向终端输出错误信息的事件处理器回调模块代码看起来如下：
 
 ```
-StateName(Event, StateData) ->
-	.. code ..
-	{next_state, StateName', StateData'}
+-module(terminal_logger).
+-behaviour(gen_event).
+-export([init/1, handle_event/2, terminate/2]).
+
+init(_Args) ->
+	{ok, []}.
+handle_event(ErrorMsg, State) ->
+	io:format("***Error*** ~p~n", [ErrorMsg]),
+	{ok, State}.
+terminate(_Args, _State) ->
+	ok.
 ```
 
-##### 9.3.2 例子
-
-带密码锁的门可以看作一个有限状态机。初始时，门是关着的。任何时候有人摁下数字，产生一个事件。根据之前的按键情况，目前为止产生的序列可能是正确的、不完整的或者错误的。
-
-如果是正确的，门会打开30秒（30,000ms）；如果不完整，就等待后续按键。如果错误，就从头开始，等待新的按键序列。
-
-用gen_fsm实现密码锁有限状态机，我们得到如下回调模块：
+把错误信息保存到文件的事件处理器回调模块代码看起来如下：
 
 ```
--module(code_lock).
--behaviour(gen_fsm).
--export([start_link/1]).
--export([button/1]).
--export([init/1, locked/2, open/2]).
-
-start_link(Code) ->
-	gen_fsm:start_link({local, code_lock}, code_lock, lists:reverse(Code), []).
-button(Digit) ->
-	gen_fsm:send_event(code_lock, {button, Digit}).
-	
-init(Code) ->
-	{ok, locked, {[], Code}}.
-locked({button, Digit}, {SoFar, Code}) ->
-	case [Digit|SoFar] of
-		Code ->
-			do_unlock(),
-			{next_state, open, {[], Code}, 30000};
-		Incomplete when length(Incomplete)<length(Code) ->
-			{next_state, locked, {Incomplete, Code}};
-		_Wrong ->
-			{next_state, locked, {[], Code}}
-	end.
-open(timeout, State) ->
-	do_lock(),
-	{next_state, locked, State}.
+-module(file_logger).
+-behaviour(gen_event).
+-export([init/1, handle_event/2, terminate/2]).
+init(File) ->
+	{ok, Fd} = file:open(File, read),
+	{ok, Fd}.
+handle_event(ErrorMsg, Fd) ->
+	io:format(Fd, "***Error*** ~p~n", [ErrorMsg]),
+	{ok, Fd}.
+terminate(_Args, Fd) ->
+	file:close(Fd).
 ```
 
 下面小节详细介绍这个例子。
 
-##### 9.3.3 启动gen_fsm
 
-上面的例子中，gen_fsm通过调用code_lock:start_link(Code):
+##### 9.5.3 启动事件管理器
 
-```
-start_link(Code) ->
-	gen_fsm:start_link({local, code_lock}, code_lock, lists:reverse(Code), []).
-```
-
-start_link通过调用gen_fsm:start_link/4，创建并链接一个新的进程，我们称实现gen_fsm行为模式的进程为一个gen_fsm进程。
-
-* 第一个参数，{local, code_lock}，进程名，表示在本地注册code_lock；如果省略名字，gen_fsm进程没有注册，因此要用到Pid。name也可以是{global, Name}的形式，这样的话gen_fsm调用global:register_name/2注册。
-* 第二个参数，code_lock，回调模块名，表示回调函数所在的模块文件。这个例子中，接口函数（start_link和button）跟回调函数（init locked 和 open）在同一个模块。这是良好的编程习惯，将进程和模块文件关联起来，一个模块文件对应一组进程。
-* 第三个参数，Code，是一组数字，反转之后传给init，init初始化时有正确的密码。
-* 第四个参数，[]，一组可选选项，*gen_fsm(3)*的man page有详细说明。
-
-如果进程名注册成功，新的gen_fsm进程会调用回调函数code_lock:init(Code)，init应当返回{ok, StateName, StateData}，StateName是gen_fsm的初始状态。这个例子中是*locked*，假设门刚开始处于锁状态。StateData是gen_fsm的内部状态。（对于gen_fsm，内部状态通常称作'状态数据'以此区分状态机的状态）。这个例子中，状态数据是目前为止的按钮序列——开始是空，Code时表示可以状态转换。
+为了启动前一节描述的处理错误的事件管理器，要调用下面的函数：
 
 ```
-init(Code) ->
-	{ok, locked, {[], Code}}.
+gen_event:start_link({local, error_man}).
 ```
 
-gen_fsm:start_link是同步调用。gen_fsm进程初始化成功并准备好接收通知时才会返回。
+这个函数创建并链接一个新的进程，一个事件管理器。
 
-当gen_fsm进程作为监控树的一部分时，gen_fsm:start_link会被监控进程调用以启动进程；作为独立进程时，可以调用gen_fsm:start启动。
+参数{local, error_man}表示进程名，表示在本地注册error_man；如果省略名字，gen_fsm进程没有注册，因此要用到Pid。name也可以是{global, Name}的形式，这样的话事件管理器要用global:register_name/2注册。
+
+当gen_event进程作为监控树的一部分时，gen_event:start_link会被监控进程调用以启动进程；作为独立进程时，可以调用gen_event:start启动。
 
 
-##### 9.3.4 事件通知
+##### 9.5.4 添加事件处理器
 
-通过调用gen_fsm:send_event/2，button函数通知代码按键事件的发生：
-
-```
-button(Digit) ->
-	gen_fsm:send_event(code_lock, {button, Digit}).
-```
-
-code_lock是gen_fsm的进程名，必须和启动时注册的名称相同。{button, Digit}是实际事件。
-
-这个事件会产生一条消息，并发送给gen_fsm框架。当事件到达时，gen_fsm框架调用StateName(Event, StateData)，并期待返回{next_state, StateName1, StateData1}。StateName是当前状态，StateName1是下一个状态。StateData1是gen_fsm的新状态数据。
+下面的代码演示了如何在shell中启动事件管理器并添加一个事件处理器：
 
 ```
-locked({button, Digit}, {SoFar, Code}) ->
-	case [Digit|SoFar] of
-		Code ->
-			do_unlock(),
-			{next_state, open, {[], Code}, 30000};
-		Incomplete when length(Incomplete) < length(Code) ->
-			{next_state, locked, {Incomplete, Code}};
-		_Wrong ->
-			{next_state, locked, {[], Code}};
-	end.
+1> gen_event:start({local, error_man}).
+{ok,<0.31.0>}
+2> gen_event:add_handler(error_man, terminal_logger, []).
+ok
 ```
 
-如果门处于锁状态，按钮按下，完整的按钮序列会和正确密码比较，根据比较结果，门会打开——导致gen_fsm状态变成open，或者维持locked状态。
-
-##### 9.3.5 超时
-
-正确的按钮序列会打开门，此时locked/2返回的元组如下：
+这个函数给注册为error_man的事件管理器发送一个消息，让它添加事件处理器terminal_logger。这个事件管理器会回调terminal_logger:init([])，[]是add_handler的第三个参数。init应该返回{ok, State}，State是事件处理器的内部状态。
 
 ```
-{next_state, open, {[], Code}, 30000};
+init(_Args) ->
+	{ok, []}.
 ```
 
-30,000是以毫秒为单位的超时值。过了超时时长，即30秒，超时时间发生。StateName(timeout, StateData)被调用。这个超时发生在门被打开30秒后，随后门被再次上锁。
+这里，init不需要用到输入数据，因此忽略参数。对于terminal_logger，内部状态同样不需要。对于file_logger，内部状态是文件描述符。
 
 ```
-open(timeout, State) ->
-	do_lock(),
-	{next_state, locked, State}.
+init(File) ->
+	{ok, Fd} = file:open(File, read),
+	{ok, Fd}.
 ```
 
-##### 9.3.5 All State Events(怎么翻译？通杀事件？)
-
-有时候一个事件需要发送给处于所有状态的gen_fsm。可以用gen_fsm:send_event/2，然后给每一个事件处理都加一条模式匹配，但是更好的办法是调用gen_fsm:send_all_state_event/2来发送消息，Module:handle_event/3来处理消息：
+##### 9.5.5 事件通知
 
 ```
--module(code_lock).
-...
-
--export([stop/0]).
-...
-stop() ->
-	gen_fsm:send_all_state_event(code_lock, stop).
-
-...
-handle_event(stop, _StateName, StateData) ->
-	{stop, normal, StateData}.
+3> gen_event:notify(error_man, no_reply).
+***Error*** no_reply
+ok
 ```
 
-##### 9.3.6 停止
+error_man是事件管理器的名称，no_reply是事件。
+
+事件会被当做消息发送给消息管理器。当事件到达时，事件管理器按照安装顺序调用每个事件处理器的handle_event(Event, State)。handle_event函数应该返回{ok, State1}，State1是事件处理器的新状态。
+
+在terminal_logger中：
+
+```
+handle_event(ErrorMsg, State) ->
+	io:format("***Error*** ~p~n", [ErrorMsg]),
+	{ok, State}.
+```
+
+在file_logger中：
+
+```
+handle_event(ErrorMsg, Fd) ->
+	io:format(Fd, "***Error*** ~p~n", [ErrorMsg]),
+	{ok, Fd}.
+```
+
+##### 9.5.6 删除事件处理器
+
+```
+4> gen_event:delete_handler(error_man, terminal_logger, []).
+ok
+```
+
+这个函数给注册为error_man的事件管理器发送一个消息，让它删除事件处理器terminal_logger。事件管理器会调用回调函数terminal_logger:terminate([], State),[]是delete_handler的的第三个参数。terminate对应init，做必要的清理工作，返回值会被忽略。
+
+对于terminal_logger，不需要清理资源：
+
+```
+terminate(_Args, _State) ->
+	ok.
+```
+
+对于file_logger，open中打开的文件描述符需要关闭：
+
+```
+terminate(_Args, Fd) ->
+	file:close(Fd).
+```
+
+##### 9.3.7 停止
+
+当事件管理器停止时，会调用每个事件处理器的terminate/2函数做清理工作，类似删除事件处理器。
 
 ###### 在监控树中
 
-如果gen_fsm进程是监控树的一部分，不需要提供专门的stop函数。gen_fsm进程会被它的监控进程supervisor自动终止。具体如何终止通过在监控进程中设置*shutdown strategy*实现。
-
-如果在进程退出之前需要清理资源，那么终止策略必须是一个超时值，而且gen_fsm进程要在init中设置为系统进程——通过捕捉exit信号。这样当终止时，gen_fsm框架会回调terminate(shutdown, StateName, StateData)函数:
-
-```
-init(Args) ->
-	...,
-	process_flag(trap_exit, true),
-	...,
-	{ok, StateName, StateData}.
-...
-terminate(shutdown, StateName, StateData) ->
-	..code for cleaning up here..
-	ok.
-```
+如果事件管理器是监控树的一部分，不需要提供专门的stop函数，会被它的监控进程supervisor自动终止。具体如何终止通过在监控进程中设置shutdown strategy实现。
 
 ###### 独立gen_fsm进程
 
-如果gen_fsm不在监控树中，要用到stop停止函数。例子：
+事件管理器可以通过调用下面的函数停止：
 
 ```
-...
--export([stop/0]).
-...
-stop() ->
-	gen_fsm:send_all_state_event(code_lock, stop).
-...
-handle_event(stop, _StateName, StateData) ->
-	{stop, normal, StateData}.
-...
-terminate(normal, _StateName, _StateData) ->
-	ok.
+> gen_event:stop(error_man).
+ok
 ```
 
-handle_event回调函数处理stop事件并返回{stop, normal, StateData1}元组，normal表示正常退出，StateData1是gen_fsm进程的新状态数据。随后gen_fsm调用terminate(normal, StateName, StateData1)，进程按预期终止。
+##### 9.3.8 其他消息处理
 
-##### 9.3.7 其他消息处理
-
-如果gen_fsm收到其他消息，必须实现回调函数handle_info(Info, StateName, StateData1)用来处理他们。其他消息包括退出信号，当gen_fsm进程链接其他进程并捕捉exit信号时。
+如果gen_event收到其他消息，必须实现回调函数handle_info(Info, State)用来处理他们（这里原文似乎有个错误）。其他消息包括退出信号，当gen_event进程链接其他进程并捕捉exit信号时。
 
 ```
 handle_info({'EXIT', Pid, Reason}, StateName, StateData) ->
 	..code to handle exits here..
-	{next_state, StateName1, StateData1}.
+	{ok, NewState}.
 ```
 
 此外，回调函数code_change必须实现。
 
 ```
-code_change(OldVsn, StateName, StateData, Extra) ->
-	..code to convert state (and more) during code change..
-	{ok, NextStateName, NewStateData}
+code_change(OldVsn, State, Extra) ->
+	..code to convert state (and more) during code change
+	{ok, NewState}
 ```
+
+
+
+#### 9.6 supervisor 行为模式
+
+这一章节结合 *stdlib* man page中的 *supervisor(3)* 阅读，man page中详细介绍了supervisor行为模式的接口函数和回调函数。
+
+##### 9.6.1 监控原则
+
+一个监控器负责启动、停止和监控它的所有子进程。监控器的基本思想是必要的时候通过重启保持子进程存活。
+
+子进程的启动和监控通过 *子进程策略(child specifications)* 列表来确定。子进程按列表顺序启动，按相反顺序终止。
+
+##### 9.6.2 例子
+
+一个gen_server行为模式服务器的supervisor的回调模块如下代码：
+
+```
+-module(ch_sup).
+-behaviour(supervisor).
+-export([start_link/0]).
+-export([init/1]).
+
+start_link() ->
+	supervisor:start_link(ch_sup, []).
+init(_Args) ->
+	SupFlags = #{strategy => one_for_one, intensity => 1, period => 5},
+	ChildSpecs = [#{id => ch3,start => {ch3, start_link, []},restart => permanent,shutdown => brutal_kill,type => worker,modules => [cg3]}],
+	{ok, {SupFlags, ChildSpecs}}.
+```
+
+init/1返回的SupFlags变量代表监视器标志。
+
+返回列表的ChildSpecs变量是子进程策略的列表。
+
+##### 9.6.3 监视器标志
+
+这是监视器标志位的类型定义：
+
+```
+sup_flags() = #{strategy => strategy(), % optional
+				intensity => non_neg_integer(), % optional
+				period => pos_integer()} % optional
+strategy() = one_for_all | one_for_one | rest_for_one | simple_one_for_one
+```
+
+*   *strategy* 表示重启策略
+*	*intensity* 和 *period* 表明 *maximum restart intensity*
+
+##### 9.6.4 重启策略
+

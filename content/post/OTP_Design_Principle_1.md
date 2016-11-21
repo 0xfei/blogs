@@ -529,7 +529,7 @@ open(timeout, State) ->
 	{next_state, locked, State}.
 ```
 
-##### 9.3.5 All State Events(怎么翻译？通杀事件？)
+##### 9.3.6 All State Events(怎么翻译？通杀事件？)
 
 有时候一个事件需要发送给处于所有状态的gen_fsm。可以用gen_fsm:send_event/2，然后给每一个事件处理都加一条模式匹配，但是更好的办法是调用gen_fsm:send_all_state_event/2来发送消息，Module:handle_event/3来处理消息：
 
@@ -547,7 +547,7 @@ handle_event(stop, _StateName, StateData) ->
 	{stop, normal, StateData}.
 ```
 
-##### 9.3.6 停止
+##### 9.3.7 停止
 
 ###### 在监控树中
 
@@ -587,7 +587,7 @@ terminate(normal, _StateName, _StateData) ->
 
 handle_event回调函数处理stop事件并返回{stop, normal, StateData1}元组，normal表示正常退出，StateData1是gen_fsm进程的新状态数据。随后gen_fsm调用terminate(normal, StateName, StateData1)，进程按预期终止。
 
-##### 9.3.7 其他消息处理
+##### 9.3.8 其他消息处理
 
 如果gen_fsm收到其他消息，必须实现回调函数handle_info(Info, StateName, StateData1)用来处理他们。其他消息包括退出信号，当gen_fsm进程链接其他进程并捕捉exit信号时。
 
