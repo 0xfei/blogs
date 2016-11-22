@@ -22,6 +22,8 @@ topics = ["Erlang/OTP", "translation"]
 
 事件管理器内部维护一个{Module, State}列表，每个Module是一个事件处理器，State是事件处理器的内部状态。
 
+<!--more-->
+
 ##### 9.5.2 例子
 
 向终端输出错误信息的事件处理器回调模块代码看起来如下：
