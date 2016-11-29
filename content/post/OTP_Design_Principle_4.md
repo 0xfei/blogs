@@ -1,6 +1,6 @@
 +++
 title = "9 OTP设计原则——第四部分"
-date = "2016-11-28T012:24:31+08:00"
+date = "2016-11-29T20:30:48+08:00"
 draft = true
 description = "OTP Design Priciple"
 tags = ["Erlang/OTP", "translation"]
