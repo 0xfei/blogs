@@ -12,6 +12,8 @@ gen_server是Erlang/OTP的通用服务器框架，使用最为广泛。源代码
 
 先看我们自己的worker.erl文件，根据OTP设计规范，既是回调模块，又是用户接口。对外导出 *start_link/0,1* , *query/1* , *set/1* , *show/1* , *stop/1*，同时实现gen_server行为模式的6个必要的回调函数：
 
+<!--more-->
+
 ```
 %% gen_server
 
