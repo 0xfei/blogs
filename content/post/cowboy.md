@@ -150,6 +150,76 @@ init(Req0, Opts) ->
 
 hello_world例子中，直接调用cowboy_req:reply发送响应，然后返回ok结束http。
 
-先回到after_parse，cowboy_stream_h:init的返回值为 *{Commands = [{spawn, Pid, Shutdown}], StreamState = #state{ref=Ref, pid=Pid}}.* 。
+先回到after_parse，cowboy_stream_h:init的返回值为 *{Commands = [{spawn, Pid, Shutdown}], StreamState = #state{ref=Ref, pid=Pid}}.* 。http模块更新state状态的streams键，以及短连接时更新last_streamid。然后调用commands：
 
-这里做个小总结：每个http服务器维护一个全局状态，而每次http请求维护一个全局请求map，并用stream id标识。
+```
+commands(State, _, []) ->
+	State;
+	
+commands(State=#state{children=Children}, StreamID, [{spawn, Pid, Shutdown}|Tail]) ->
+	commands(State#state{children=[{Pid, StreamID, Shutdown}|Children]}, StreamID, Tail);
+```
+
+将同一连接的子进程加入state的children状态。GET请求一般到这里就结束了，因为没有数据包。http连接终止时，会把子进程信息从children中取出。具体的终止在下面的响应包发送的时候提及。
+
+做个小总结：每次http访问维护一个全局状态，而每个http长连接维护一组用stream id标识的streams，即基于cowboy_stream_h模块的进程，回调用户模块处理请求。
+
+有一个很重要的功能还没介绍——发送响应。通过导出接口cowboy_req:reply实现：
+
+```
+reply(Status, Headers, Body, Req) when is_integer(Status); is_binary(Status) ->
+	do_reply(Status, Headers#{<<"content-length">> => integer_to_binary(iolist_size(Body))}, Body, Req).
+	
+do_reply(Status, Headers, Body, Req=#{pid := Pid, streamid := StreamID}) ->
+	Pid ! {{Pid, StreamID}, {response, Status, response_headers(Headers, Req), Body}},
+	done_replying(Req, true).
+```
+
+向请求上下文记录的pid发送{Pid,StreamID}开头的消息，pid指向http进程：
+
+```
+%% cowboy_http.erl loop
+loop(State=#state{parent=Parent, socket=Socket, transport=Transport,
+		handler=_Handler, timer=TimerRef, children=Children}, Buffer) ->
+	{OK, Closed, Error} = Transport:messages(),
+	receive
+		%% Messages pertaining to a stream.
+		{{Pid, StreamID}, Msg} when Pid =:= self() ->
+			loop(info(State, StreamID, Msg), Buffer);
+	...
+```
+
+http调用info函数，info首先找出stream对应的状态，并回调stream处理模块cowboy_stream_h的info函数，info返回{Command, NewStreamState}，http调用commands函数处理命令并更新流状态：
+
+```
+%% cowboy_stream_h.erl 
+%% Response.
+info(_StreamID, Response = {response, _, _, _}, State) ->
+	{[Response], State};
+	
+%% normal exit
+info(_StreamID, {'EXIT', Pid, normal}, State=#state{pid=Pid}) ->
+	{[stop], State};
+```
+
+这里顺便把连接关闭时的info处理过程放上，处理都是类似的。commands函数的{response,...}分支处理响应包。
+
+```
+commands(State0=#state{socket=Socket, transport=Transport, out_state=wait, streams=Streams}, StreamID,
+		[{response, StatusCode, Headers0, Body}|Tail]) ->
+	#stream{version=Version} = lists:keyfind(StreamID, #stream.id, Streams),
+	{State, Headers} = connection(State0, Headers0, StreamID, Version),
+	Response = cow_http:response(StatusCode, 'HTTP/1.1', headers_to_list(Headers)),
+	case Body of
+		{sendfile, O, B, P} ->
+			Transport:send(Socket, Response),
+			commands(State#state{out_state=done}, StreamID, [{sendfile, fin, O, B, P}|Tail]);
+		_ ->
+			Transport:send(Socket, [Response, Body]),
+			maybe_terminate(State#state{out_state=done}, StreamID, Tail, fin)
+	end;
+```
+
+Transport是ranch_tcp，发送响应。
+
+cowboy是一款功能强大的http服务器，类似nginx，轻量、高度可定制，如果用来实现负载均衡器，应该也是不错的。更具体的细节我还没看，包括REST支持、介入请求处理流程等。熟悉之后再写更多的分析文章。
