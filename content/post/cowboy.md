@@ -7,7 +7,7 @@ tags = ["Erlang/OTP", "code", "cowboy"]
 topics = ["Erlang/OTP", "code", "cowboy"]
 +++
 
-cowboy是基于[ranch](http://0x01f.com/post/ranch/)的http服务器框架，提供用户自定义路由、REST接口等便利功能。由于ranch是很完善的TCP池，所以在此之上的cowboy代码很容易支持http/https。虽说如此，http毕竟是很复杂的协议，好多细节不参考RFC根本搞不清楚。借此机会我要详细了解如何实现完整的HTTP服务器。首先了解cowboy完整的流程以及使用方法。
+cowboy是基于[ranch](http://0x01f.com/post/ranch/)的http服务器框架，提供用户自定义路由、REST接口等便利功能。由于ranch是很完善的TCP池，所以在此之上的cowboy代码很容易支持http/https。虽说如此，http毕竟是很复杂的协议，好多细节不参考RFC根本搞不清楚。借此机会详细了解如何实现完整的HTTP服务器。首先了解cowboy完整的流程以及使用方法。
 
 最简单的例子：
 
@@ -22,6 +22,8 @@ start(_Type, _Args) ->
 		env => #{dispatch => Dispatch}
 	}),
 ```
+
+<!--more-->
 
 cowboy_router.erl模块用于路由匹配，用户传入路由列表，并将其作为cowboy:start_clear的第四个参数的env值。类型定义和解析非常具有Erlang特色，新手看绝对会头晕，甚至完全看不懂。我也是配合shell才完全理解。'_'代表host，随后的列表是path元组，匹配host之下的路径，支持[]可选模式和_通配符等，匹配成功后回调指定的模块，这里是toppage_handler。
 
