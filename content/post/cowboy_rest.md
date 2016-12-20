@@ -1,15 +1,15 @@
 +++
 date = "2016-12-20T19:40:44+08:00"
-title = "HTTP¿¿¿¿cowboy_rest"
+title = "HTTPè¯·æ±‚å¤„ç†cowboy_rest"
 draft = true
 description = "HTTP Request parser"
 tags = ["Erlang/OTP", "code", "cowboy"]
 topics = ["Erlang/OTP", "code", "cowboy"]
 +++
 
-cowboy_rest¿REST¿¿¿¿¿¿¿¿¿¿¿HTTP¿¿¿¿¿¿¿nginx¿¿¿¿¿¿¿¿¿nginx¿¿¿¿¿¿¿¿http¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿cowboy¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿middlewares¿¿¿¿¿execute¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿nginx¿¿¿¿¿¿¿¿¿markdown¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿cowboy_rest¿¿¿¿¿¿¿¿¿¿
+cowboy_restä»¥RESTæ–¹å¼ï¼Œå…è®¸ç”¨æˆ·æ¨¡å—ä»‹å…¥HTTPè¯·æ±‚å¤„ç†ã€‚çœ‹è¿‡nginxæºç çš„åŒå­¦éƒ½çŸ¥é“ï¼Œnginxå›žè°ƒæ¨¡å—å¯ä»¥ä»‹å…¥httpè¯·æ±‚å¤„ç†ï¼Œä¾é è¯·æ±‚è¿‡ç¨‹ä¸­åˆ’åˆ†çš„åå‡ ä¸ªé˜¶æ®µï¼Œå®žçŽ°èµ„æºé‡å®šå‘ã€æƒé™æŽ§åˆ¶ç­‰ã€‚cowboyçš„åšæ³•ç•¥æœ‰ä¸åŒï¼Œå‰ä¸€ç¯‡æåˆ°è¿‡ä¸­é—´ä»¶çš„æ¦‚å¿µã€‚ç»™middlewaresè®¾ç½®å®žçŽ°äº†executeå›žè°ƒçš„æ¨¡å—ï¼ŒæŽ¥æ”¶åˆ°è¯·æ±‚å¤´å’Œæ•°æ®åŒ…åŽä»‹å…¥å¤„ç†ï¼Œå®žçŽ°nginxç±»ä¼¼åŠŸèƒ½ï¼Œå®˜æ–¹æœ‰ä¸ªmarkdownçš„ä¾‹å­ï¼Œå›žå¤´åˆ†æžã€‚ä¸€èˆ¬æ¥è¯´ï¼Œæˆ‘ä»¬å…³æ³¨æ­£å¸¸è¯·æ±‚ï¼Œåœ¨ç”¨æˆ·å›žè°ƒæ¨¡å—ä¸­å®žçŽ°cowboy_restæ¨¡å—çš„å¯é€‰å›žè°ƒå³å¯ã€‚
 
-cowboy_handler¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿{cowboy_rest, Req, State}¿¿¿¿¿cowboy_rest:upgrade/6¿
+cowboy_handlerä½œä¸ºè¯·æ±‚å¤„ç†çš„æœ€åŽä¸€çŽ¯ï¼Œæ ¹æ®è·¯ç”±è§„åˆ™å›žè°ƒç”¨æˆ·æ¨¡å—ï¼Œå¦‚æžœè¿”å›ž{cowboy_rest, Req, State}ï¼Œå°±ä¼šè°ƒç”¨cowboy_rest:upgrade/6ï¼š
 
 ```
 execute(Req, Env=#{handler := Handler, handler_opts := HandlerOpts}) ->
@@ -22,9 +22,9 @@ execute(Req, Env=#{handler := Handler, handler_opts := HandlerOpts}) ->
 
 <!--more-->
 
-¿¿¿Mod¿cowboy_rest¿
+è¿™é‡Œçš„Modå³cowboy_restã€‚
 
-cowboy_rest:upgrade¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿HTTP¿¿¿¿¿¿¿¿¿¿¿¿¿¿expect¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿OnTrue¿OnFalse¿
+cowboy_rest:upgradeåˆ©ç”¨å°¾é€’å½’çš„å½¢å¼ï¼Œå±‚å±‚è°ƒç”¨å¯é€‰çš„å›žè°ƒæ¨¡å—ï¼Œä¾æ¬¡å¤„ç†HTTPè¯·æ±‚å‚æ•°ï¼Œå…ˆçœ‹ä¸€äº›è¾…åŠ©å‡½æ•°ã€‚expectå›žè°ƒæ¨¡å—å¯¼å‡ºå‡½æ•°ï¼Œå¹¶æ ¹æ®è¿”å›žå€¼è°ƒç”¨OnTrueæˆ–OnFalseï¼š
 
 ```
 expect(Req, State, Callback, Expected, OnTrue, OnFalse) ->
@@ -61,28 +61,28 @@ respond(Req, State, StatusCode) ->
 	terminate(cowboy_req:reply(StatusCode, Req), State).
 ```
 
-¿¿¿¿¿¿¿¿¿¿¿¿expect¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿service_avaliable¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿503¿
+æ•´ä¸ªè¯·æ±‚è¡Œçš„å¤„ç†éƒ½æ˜¯åˆ©ç”¨expectè°ƒç”¨å›žè°ƒï¼Œæˆ–è€…ä½¿ç”¨é»˜è®¤å¤„ç†ã€‚é¦–å…ˆæ˜¯service_avaliableï¼Œåˆ¤æ–­æœåŠ¡å™¨çŠ¶æ€ï¼Œä¸å¯ç”¨æ˜¯è¿”å›ž503ï¼š
 
 ```
 -callback service_available(Req, State) when Req::cowboy_req:req(), State::any() -> 
 	{boolean(), Req, State} | {stop, Req, State}.
 ```
 
-¿¿¿¿¿known_methods/2¿¿¿¿¿¿¿¿¿¿¿¿¿¿<<"HEAD">> <<"GET">> <"POST">> <<"PUT">> <<"PATCH">> <<"DELETE">> <<"OPTIONS">>¿¿¿501¿¿¿¿uri_too_long:
+æŽ¥ä¸‹æ¥è°ƒç”¨known_methods/2ï¼Œè¿”å›žå¯ç”¨çš„æ–¹æ³•å¤´ï¼Œé»˜è®¤æ”¯æŒ<<"HEAD">> <<"GET">> <"POST">> <<"PUT">> <<"PATCH">> <<"DELETE">> <<"OPTIONS">>ï¼Œè¿”å›ž501æˆ–è€…æ‰§è¡Œuri_too_long:
 
 ```
 uri_too_long(Req, State) ->
 	expect(Req, State, uri_too_long, false, fun allowed_methods/2, 414).
 ```
 
-¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿false¿¿414¿¿HTTP¿¿¿¿¿allowed_methods¿¿¿¿¿¿OPTIONS¿¿¿¿¿¿¿¿¿¿¿¿¿405¿¿¿¿¿¿¿¿¿¿malformed_request¿
+è¿™ä¸ªå‡½æ•°åæœ‰äº›æ¨¡ç³Šï¼Œå¯ä»¥åšçš„äº‹æƒ…ä¹Ÿæ²¡æœ‰è¯¦ç»†è¯´æ¸…æ¥šã€‚æ€»ä¹‹å¯ä»¥åœ¨å›žè°ƒé‡Œåšå¾ˆå¤šäº‹æƒ…ï¼Œè¿”å›žfalseæ—¶ä»¥414ç»ˆæ­¢HTTPã€‚æŽ¥ç€æ‰§è¡Œallowed_methodsï¼Œè¿™é‡Œä¼šå¤„ç†OPTIONSé€‰é¡¹ï¼Œè®¾ç½®å¯ç”¨æ–¹æ³•ï¼Œæˆ–è€…ä»¥405ç»ˆæ­¢è¯·æ±‚ã€‚æŽ¥ä¸‹æ¥è°ƒç”¨malformed_requestï¼š
 
 ```
 malformed_request(Req, State) ->
 	expect(Req, State, malformed_request, false, fun is_authorized/2, 400).
 ```
 
-malformed_request¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿is_authorized¿is_authorized¿forbidden¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿options¿¿¿
+malformed_requeståº”è¯¥æ˜¯ç”¨æ¥å¤„ç†ä¹±ä¸ƒå…«ç³Ÿçš„è¯·æ±‚å‚æ•°ï¼Œç„¶åŽè°ƒç”¨is_authorizedã€‚is_authorizedå’Œforbiddenå›žè°ƒä¸€èˆ¬åŒæ—¶æä¾›ï¼Œé»˜è®¤æƒ…å†µæ‰§è¡Œä¸‹é¢çš„æµç¨‹ï¼Œè¿›å…¥optionså‡½æ•°ï¼š
 
 ```
 forbidden(Req, State) ->
@@ -95,22 +95,22 @@ valid_entity_length(Req, State) ->
 	expect(Req, State, valid_entity_length, true, fun options/2, 413).
 ```
 
-options¿¿ <<"OPTIONS">> ¿¿¿¿¿allow¿¿¿¿¿¿200¿¿¿¿¿¿¿content_types_provided/2¿¿¿
+optionså¤„ç† <<"OPTIONS">> é€‰é¡¹ï¼Œè®¾ç½®allowå¤´éƒ¨ï¼Œå¹¶è¿”å›ž200ã€‚å…¶å®ƒæ–¹æ³•è¿›å…¥content_types_provided/2å¤„ç†ã€‚
 
-content_types_provided¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿ *MIME¿¿¿¿¿¿¿¿* ¿¿¿¿¿¿¿¿¿cowboy_rest¿¿¿¿¿content_types_p¿¿¿¿¿¿¿Accept¿¿¿¿¿prioritize_accept/1¿¿¿¿¿¿¿¿¿¿¿choose_media_type/3¿¿¿¿¿¿¿¿¿¿¿¿¿content_type_a¿media_type¿¿¿¿¿languages_provided/2¿
+content_types_providedå›žè°ƒç”¨æˆ·æ¨¡å—çš„åŒåå‡½æ•°ï¼Œè¯¥å›žè°ƒè¿”å›žä¸€ç»„ *MIMEç±»åž‹ä»¥åŠå¤„ç†å‡½æ•°* ç»„æˆçš„åˆ—è¡¨ï¼Œä¿å­˜ä¸ºcowboy_restå†…éƒ¨çŠ¶æ€çš„content_types_på‚æ•°ã€‚ç„¶åŽè§£æžAcceptå¤´ï¼Œå¹¶é€šè¿‡prioritize_accept/1é€‰å‡ºæœ€ä¼˜å…ˆæŽ¥å—çš„ç±»åž‹ã€‚choose_media_type/3ç¡®å®šå®žé™…é€‰æ‹©çš„ç±»åž‹ï¼Œå¹¶è®¾ç½®content_type_aå’Œmedia_typeã€‚ç„¶åŽè¿›å…¥languages_provided/2ã€‚
 
-languages_provided/2¿¿¿¿¿¿¿¿¿¿¿accept-language¿¿¿¿languages_p¿languages_a¿¿¿content-language¿¿¿¿¿¿charsets_provided/2¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿accept-charset¿¿¿¿¿¿¿¿set_content_type¿¿¿¿¿¿¿content-type¿¿
+languages_provided/2åŒæ ·å›žè°ƒåŒåå‡½æ•°ï¼Œè§£æžaccept-languageå¤´ï¼Œæ›´æ–°languages_på’Œlanguages_aï¼Œè®¾ç½®content-languageå“åº”å¤´ã€‚è¿›å…¥charsets_provided/2ï¼Œç±»ä¼¼å‰é¢çš„å¤„ç†æµç¨‹ï¼Œåªæ˜¯é’ˆå¯¹accept-charsetè¯·æ±‚å¤´ã€‚æŽ¥ç€è°ƒç”¨set_content_typeè®¾ç½®å¥½å“åº”åŒ…çš„content-typeå¤´ï¼Œ
 
-¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿variances¿¿¿¿Vary¿¿¿¿¿¿¿¿¿¿¿¿¿¿resource_exists/2¿¿¿¿¿¿¿¿¿¿¿
+æ¼«é•¿çš„ç±»åž‹ç›¸å…³å¤„ç†ä¹‹åŽï¼Œæ˜¯ç¼“å­˜ç›¸å…³ã€‚é¦–å…ˆvarianceså‡½æ•°è®¾ç½®Varyå¤´ï¼ˆç”¨äºŽç¼“å­˜æŽ§åˆ¶ï¼‰ã€‚ç„¶åŽè°ƒç”¨resource_exists/2ï¼Œåˆ¤æ–­ç¼“å­˜æ˜¯å¦è¿‡æœŸç­‰ï¼š
 
 ```
 resource_exists(Req, State) ->
 	expect(Req, State, resource_exists, true, fun if_match_exists/2, fun if_match_must_not_exist/2).
 ```
 
-if_match_exists/2 ¿ if_match_must_not_exist/2 ¿¿¿¿¿ if-match ¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿if-match¿etag¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿if-unmodified-since¿if-modified-since¿if-match¿if-none-match¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
+if_match_exists/2 å’Œ if_match_must_not_exist/2 æ ¹æ®è¯·æ±‚å¤´ if-match æ˜¯å¦å­˜åœ¨ï¼Œé€‰æ‹©ç›¸åçš„å¤„ç†é€»è¾‘ã€‚if-matchå’Œetagç»“åˆï¼Œæ˜¯ä¸€ç§ä¸åŒäºŽä¿®æ”¹æ—¶é—´çš„ç¼“å­˜ç­–ç•¥ï¼Œå…·ä½“å®žæ–½ç”±æœåŠ¡ç«¯ç¡®å®šã€‚if-unmodified-sinceã€if-modified-sinceã€if-matchå’Œif-none-matchå››ä¸ªå¤´æŽ§åˆ¶ç¼“å­˜ã€‚è¿™é‡Œçš„é€»è¾‘ç•¥å¾®æœ‰äº›æ··ä¹±ï¼Œå€’å™æ›´é€‚åˆä¸€äº›ã€‚å…ˆçœ‹çœŸæ­£çš„åˆ¤æ–­å’Œå¤„ç†é€»è¾‘ã€‚
 
-if-match¿¿¿¿¿¿¿¿etag¿¿¿¿¿
+if-matchå¤´å­˜åœ¨æ—¶ï¼Œè¦åŒ¹é…etagåˆ¤æ–­ç¼“å­˜ï¼š
 
 ```
 if_match(Req, State, EtagsList) ->
@@ -129,7 +129,7 @@ if_match(Req, State, EtagsList) ->
 	end.
 ```
 
-precondition_failed ¿¿ 412 ¿¿¿¿¿¿if_none_match_exists¿¿if-none-match¿¿¿¿
+precondition_failed è¿”å›ž 412 é¢„å¤„ç†é”™è¯¯ã€‚if_none_match_existså¤„ç†if-none-matchè¯·æ±‚å¤´ï¼š
 
 ```
 if_none_match_exists(Req, State) ->
@@ -165,7 +165,7 @@ precondition_is_head_get(Req, State) ->
 	precondition_failed(Req, State).
 ```
 
-precondition_is_head_get¿¿etag¿¿¿¿¿¿¿¿if_modified_since_exists¿¿if-modified-since¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿not_modified¿¿304¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿method¿¿¿¿¿
+precondition_is_head_getå¤„ç†etagåŒ¹é…æˆåŠŸçš„æƒ…å†µã€‚if_modified_since_existså¤„ç†if-modified-sinceå¤´ï¼Œå½“ä¿®æ”¹æ—¶é—´å°äºŽæŒ‡å®šçš„å€¼æ—¶ï¼Œç›´æŽ¥è¿”å›žnot_modifiedï¼Œå³304ã€‚å¦‚æžœå½“å‰æ—¶é—´è¶…è¿‡è¯¥å€¼ï¼Œç›´æŽ¥è°ƒç”¨methodæ­£å¸¸è°ƒç”¨ã€‚
 
 ```
 if_modified_since_exists(Req, State) ->
@@ -198,7 +198,7 @@ if_modified_since(Req, State, IfModifiedSince) ->
 	end.
 ```
 
-not_modified¿¿etag¿expires¿¿¿¿304¿¿¿
+not_modifiedè®¾ç½®etagå’Œexpiresï¼Œå¹¶å‘å›ž304å“åº”ï¼š
 
 ```
 not_modified(Req, State) ->
@@ -216,7 +216,7 @@ not_modified(Req, State) ->
 	end.
 ```
 
-if_unmodified_since_exists¿¿if-unmodified-since¿¿¿¿
+if_unmodified_since_existså¤„ç†if-unmodified-sinceè¯·æ±‚å¤´ï¼š
 
 ```
 if_unmodified_since(Req, State, IfUnmodifiedSince) ->
@@ -231,9 +231,9 @@ if_unmodified_since(Req, State, IfUnmodifiedSince) ->
 	end.
 ```
 
-if-unmodified-since ¿¿¿¿¿¿¿¿¿¿¿ 412 ¿¿¿¿¿¿¿¿¿¿¿¿¿ if-none-match ¿¿¿¿¿¿¿¿¿¿¿¿
+if-unmodified-since å¤´å¦‚æžœè¢«ä¿®æ”¹ï¼Œç›´æŽ¥è¿”å›ž 412 é¢„å¤„ç†å¤±è´¥ï¼›æ²¡è¢«ä¿®æ”¹å°±æ£€æŸ¥ if-none-match å¤´ï¼Œç»§ç»­ä¸Šé¢ä»‹ç»çš„å¤„ç†ã€‚
 
-¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿
+è¿™é‡Œç”¨äº†å¥‡æ€ªçš„å¾ªçŽ¯æ£€æµ‹ï¼Œå› ä¸ºè¦è€ƒè™‘åˆ°æ‰€æœ‰çš„è¯·æ±‚å¤´ï¼Œè€Œä¸”æ˜¯å°¾é€’å½’ï¼Œæ‰€ä»¥çœ‹èµ·æ¥æœ‰ç‚¹ä¹±ã€‚æ­¤å¤–è¿˜æœ‰ä¸ªé—æ¼ï¼Œå³èµ„æºä¸å­˜åœ¨æ—¶çš„å¤„ç†ï¼š
 
 ```
 is_put_to_missing_resource(Req, State=#state{method= <<"PUT">>}) ->
@@ -242,7 +242,7 @@ is_put_to_missing_resource(Req, State) ->
 	previously_existed(Req, State).
 ```
 
-moved_permanently¿¿¿¿PUT¿¿¿¿¿¿¿location¿¿¿¿¿¿¿¿¿¿¿¿¿¿accept_resource¿¿¿¿¿
+moved_permanentlyç”¨äºŽå¤„ç†PUTè¯·æ±‚ï¼Œé€šè¿‡è®¾ç½®locationå“åº”å¤´ï¼Œå®žçŽ°é‡å®šå‘ã€‚æˆ–è€…è°ƒç”¨accept_resourceæŽ¥æ”¶èµ„æºï¼š
 
 ```
 accept_resource(Req, State) ->
@@ -263,7 +263,7 @@ accept_resource(Req, State) ->
 	end.
 ```
 
-process_content_type¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿content_types_accepted¿¿¿MIME¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿method¿¿¿¿¿¿¿¿¿¿¿¿
+process_content_typeæ ¹æ®èµ„æºç±»åž‹ï¼Œè°ƒç”¨ç›¸åº”çš„å‡½æ•°æ¥å¤„ç†ã€‚è¿™é‡Œæ˜¯content_types_acceptedè¿”å›žçš„MIMEç±»åž‹å’Œå¤„ç†å‡½æ•°å‘æŒ¥ä½œç”¨çš„åœ°æ–¹ï¼Œè¿™ä¸ªå‡½æ•°åœ¨ä¸‹é¢çš„methodæ–¹æ³•ä¸­ä¹Ÿæ˜¯å¾ˆé‡è¦çš„åˆ†æ”¯ï¼š
 
 ```
 process_content_type(Req, State=#state{method=Method, exists=Exists}, Fun) ->
@@ -292,7 +292,7 @@ process_content_type(Req, State=#state{method=Method, exists=Exists}, Fun) ->
 	end.
 ```
 
-¿¿¿¿¿¿¿¿¿¿method¿¿¿¿¿¿¿¿¿
+å…¶ä»–æµç¨‹æœ€åŽéƒ½ä¼šèµ°åˆ°methodï¼ŒçœŸæ­£çš„è¯·æ±‚å¤„ç†ã€‚
 
 ```
 method(Req, State=#state{method= <<"DELETE">>}) ->
@@ -309,9 +309,9 @@ method(Req, State) ->
 	multiple_choices(Req, State).
 ```
 
-¿¿¿¿¿¿set_resp_body_etag¿¿¿GET¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿¿set_resp_body¿¿¿content_types_provided¿¿¿¿¿¿
+ç®€å•ä»‹ç»ä¸€ä¸‹set_resp_body_etagå‡½æ•°ï¼ŒGETæ–¹æ³•æ—¶ï¼Œå®ƒä¼šå¤„ç†ç‰¹å®šçš„ç±»åž‹å¹¶è¿”å›žç»™å®¢æˆ·ï¼Œåœ¨set_resp_bodyé‡Œå›žè°ƒcontent_types_providedçš„è¿”å›žå†…å®¹ã€‚
 
-upgrade¿¿¿response¿¿¿¿
+upgradeè°ƒç”¨åœ¨responseå¤„ç»ˆç»“ï¼š
 
 ```
 respond(Req, State, StatusCode) ->
