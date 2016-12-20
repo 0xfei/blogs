@@ -2,7 +2,7 @@
 date = "2016-12-15T00:10:44+08:00"
 title = "Erlang HTTP服务器cowboy"
 draft = true
-description = "tcp acceptor pool ranch"
+description = "Http server cowboy"
 tags = ["Erlang/OTP", "code", "cowboy"]
 topics = ["Erlang/OTP", "code", "cowboy"]
 +++
