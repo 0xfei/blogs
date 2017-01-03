@@ -1,4 +1,17 @@
-#### Erlang基础
++++
+title = "Learn you some Erlang for great good!"
+date = "2016-12-31T14:47:10+08:00"
+draft = true
+description = "Learn you some Erlang for great good!"
+tags = ["Erlang/OTP", "Book", "reading"]
+topics = ["Erlang/OTP", "Book", "reading"]
++++
+
+[《Erlang趣学指南》](http://learnyousomeerlang.com/content) ，国内最新引进翻译的Erlang书，实际上13年就已经写好了。虽然如此，依旧是市面上最新的相关书籍。“趣”真说不上，作者的搞笑有点刻意，他的图画的倒是很有趣。这本书比它看起来要难很多，言简意赅，涉及到Erlang的方方面面。例子也都很实际。作者把所有章节都放了出来，可以免费看。
+
+花了两天时间抽空看完，记录一些容易忽略的小知识，也学习它的有用的例子。
+
+<!--more-->
 
 atom很容易让人忽略的陷阱是它会保存在atom表里，并且不会被GC回收。所以尽量不要使用list_to_atom等，使用约定俗成的原子是好习惯。
 
@@ -145,15 +158,15 @@ monitor监控进程要比link更有效，监控的进程退出时，会收到{'D
 
 #### OTP
 
-OTP是一套框架，基于进程链接和消息分发，提供编写稳定Erlang程序的框架，只需编写回调即可。gen_server和supervisor用的多，所以我重点看了下gen_fsm状态机行为模式。书中的例子是一个交易模型，允许随时取消交易，并将交易过程分成多个阶段，保证双方一致性。
+OTP是一套框架，基于进程链接和消息分发，提供编写稳定Erlang程序的框架，只需编写回调即可。 ```gen_server``` 和 ```supervisor``` 用的多，所以我重点看了下 ```gen_fsm``` 状态机行为模式。书中的例子是一个交易模型，允许随时取消交易，并将交易过程分成多个阶段，保证双方一致性。
 
 进入交易阶段，需要利用FSM通知对方，为了避免死锁需要用异步消息，所以多一个阶段，提出和接收交易请求后进入新的等待状态，相当于进入交易前一层缓冲；在此状态也能通过取消回到普通等待。完成协商，并真正确认交易的流程也是类似两个步骤。交易是两方的，一方提供完成后进入协商完成状态——即等待，等另一方的协商完成；另一方的商品变动触发本方重新计入协商状态。
 
 这里还个坑，看下图:
 
-fsm_race_wait.png
+![fsm_race_wait](http://0x01f.com/images/fsm_race_wait.png "fsm_race_wait")
 
 复杂的状态转移确实容易出问题。
 
-这个例子不是简单的实例，而是完整的实用模型。考虑问题很全面，值得认真看看。http://learnyousomeerlang.com/finite-state-machines
+这个例子不是简单的实例，而是完整的实用模型。考虑问题很全面，值得认真[看看](http://learnyousomeerlang.com/finite-state-machines)。
 
