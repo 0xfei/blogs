@@ -170,3 +170,20 @@ OTP是一套框架，基于进程链接和消息分发，提供编写稳定Erlan
 
 这个例子不是简单的实例，而是完整的实用模型。考虑问题很全面，值得认真[看看](http://learnyousomeerlang.com/finite-state-machines)。
 
+gen_event事件行为模式是一个事件管理器，也可以用于事件分发——注册函数把事件转发给另一个进程。gen_event回调模块只需要提供事件处理函数，不涉及新进程的创建。
+
+所以一个gen_event模块的工作流程如下：
+
+```
+gen_event:start_link/0 -> gen_event:add_handler/3 -> EventHandler:init/1
+
+gen_event:notify/2 -> EventHandler:handle_event/2
+```
+
+最常用的error_logger模块，处理错误日志，也是一个event管理器。
+
+```
+add_report_handler(Module, Args) when is_atom(Module) ->
+    gen_event:add_handler(error_logger, Module, Args).
+```
+
