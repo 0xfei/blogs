@@ -1,7 +1,7 @@
 +++
 title = "Learn you some Erlang for great good!"
 date = "2016-12-31T14:47:10+08:00"
-draft = true
+draft = false
 description = "Learn you some Erlang for great good!"
 tags = ["Erlang/OTP", "Book", "reading"]
 topics = ["Erlang/OTP", "Book", "reading"]
