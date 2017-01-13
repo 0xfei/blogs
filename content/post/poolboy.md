@@ -180,7 +180,7 @@ handle_info({'EXIT', Pid, _Reason}, State) ->
     end;
 ```
 
-'DOWN'消息表示外部进程退出，跟 `cancel_waiting` 处理类似；'EXIT'表示worker进程退出，如果该进程正在处理服务，首先结束当前和外部进程的关联，然后在 `handle_worker_exit` 处理新进程和waiting队列的关系。否则直接新建一个worker。
+`'DOWN'` 消息表示外部进程退出，跟 `cancel_waiting` 处理类似；'EXIT'表示worker进程退出，如果该进程正在处理服务，首先结束当前和外部进程的关联，然后在 `handle_worker_exit` 处理新进程和waiting队列的关系。否则直接新建一个worker。
 
 ```
 handle_worker_exit(Pid, State) ->
@@ -203,4 +203,6 @@ handle_worker_exit(Pid, State) ->
     end.
 ```
 
-这里的处理和 checkin 也有点类似。
+这里的处理和 checkin 也有点类似，新的补充进程给wait队列的进程提供服务。
+
+进程池原理很简单，实现思路也有很多种（poolboy是在 `gen_server` 下启动 `supervisor` ，进而管理 worker 进程）。但是需要考虑的并不少，要有清晰的逻辑才能写好。
