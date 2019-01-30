@@ -3,8 +3,9 @@ title = "9 OTP设计原则——第三部分"
 date = "2016-11-21T04:09:05+08:00"
 draft = true
 description = "OTP Design Priciple"
-tags = ["Erlang/OTP", "translation"]
-topics = ["Erlang/OTP", "translation"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "翻译文章"]
+topics = ["Erlang/OTP"]
 +++
 
 

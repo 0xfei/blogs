@@ -3,8 +3,9 @@ title = "gen_server源码阅读"
 date = "2016-12-02T14:47:10+08:00"
 draft = true
 description = "gen_server source code"
-tags = ["Erlang/OTP", "code", "gen_server"]
-topics = ["Erlang/OTP", "code", "gen_server"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "源码分析"]
+topics = ["Erlang/OTP"]
 +++
 
 

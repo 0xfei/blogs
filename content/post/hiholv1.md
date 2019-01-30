@@ -2,8 +2,9 @@
 date = "2016-09-07T23:46:45+08:00"
 draft = true
 description = "hiho level1 codes."
-tags = ["C++", "hiho"]
-topics = ["C++", "hiho"]
+categories = ["算法题目"]
+tags = ["C/C++", "算法题目"]
+topics = ["C/C++", "算法题目"]
 title = "hiho难度1题目题解"
 +++
 

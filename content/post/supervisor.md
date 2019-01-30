@@ -3,8 +3,9 @@ title = "supervisor源码阅读"
 date = "2016-12-06T15:40:54+08:00"
 draft = true
 description = "supervisor source code"
-tags = ["Erlang/OTP", "code", "supervisor"]
-topics = ["Erlang/OTP", "code", "supervisor"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "源码分析"]
+topics = ["Erlang/OTP"]
 +++
 
 

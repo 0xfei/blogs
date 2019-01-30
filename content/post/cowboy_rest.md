@@ -3,8 +3,9 @@ date = "2016-12-20T19:40:44+08:00"
 title = "HTTP请求处理cowboy_rest"
 draft = true
 description = "HTTP Request parser"
-tags = ["Erlang/OTP", "code", "cowboy"]
-topics = ["Erlang/OTP", "code", "cowboy"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "源码分析"]
+topics = ["Erlang/OTP"]
 +++
 
 cowboy_rest以REST方式，允许用户模块介入HTTP请求处理。看过nginx源码的同学都知道，nginx回调模块可以介入http请求处理，依靠请求过程中划分的十几个阶段，实现资源重定向、权限控制等。cowboy的做法略有不同，前一篇提到过中间件的概念。给middlewares设置实现了execute回调的模块，接收到请求头和数据包后介入处理，实现nginx类似功能，官方有个markdown的例子，回头分析。一般来说，我们关注正常请求，在用户回调模块中实现cowboy_rest模块的可选回调即可。

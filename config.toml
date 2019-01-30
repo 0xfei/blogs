@@ -1,7 +1,8 @@
 baseurl = "/"
 languageCode = "en-us"
 title = "0x01f"
-theme = "detox"
+#theme = "detox"
+theme = "beg"
 
 contentdir = "content"
 layoutdir = "layouts"
@@ -13,3 +14,18 @@ buildFuture = true
 [Params]
 	author = "0x01f"
 	description = "Ma' in wojel ba'ax ka lelo' u k'áat u ya'al"
+
+[menu]
+  [[menu.main]]
+    identifier = "About"
+    name = "About"
+    pre = "<i class='fa fa-heart'></i>"
+    url = "/about/"
+    weight = -110
+
+  [[menu.main]]
+    name = "Github"
+    post = "<span class='alert'>New!</span>"
+    pre = "<i class='fa fa-road'></i>"
+    url = "http://github.com/0xfei"
+    weight = -100

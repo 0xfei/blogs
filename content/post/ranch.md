@@ -3,8 +3,9 @@ date = "2016-12-08T00:10:44+08:00"
 title = "tcp连接池ranch"
 draft = true
 description = "tcp acceptor pool ranch"
-tags = ["Erlang/OTP", "code", "ranch"]
-topics = ["Erlang/OTP", "code", "ranch"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "源码分析"]
+topics = ["Erlang/OTP"]
 +++
 
 

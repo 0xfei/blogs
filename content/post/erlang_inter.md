@@ -3,8 +3,9 @@ title = "Erlang和其他语言的交互"
 date = "2017-01-09T19:24:10+08:00"
 draft = true
 description = "Interoperability Erlang"
-tags = ["Erlang/OTP", "C"]
-topics = ["Erlang/OTP", "C"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP"]
+topics = ["Erlang/OTP"]
 +++
 
 Erlang和其他语言（如C和Java）的交互手段一直是我很感兴趣的主题，周末看了下OTP文档，终于大致理清楚了思路。这里先简单总结四种交互手段，也是更进一步学习Erlang的开始。

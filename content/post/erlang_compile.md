@@ -3,8 +3,9 @@ title = "Erlang编译相关模块"
 date = "2017-01-12T16:48:14+08:00"
 draft = true
 description = "Erlang compile"
-tags = ["Erlang/OTP", "Code"]
-topics = ["Erlang/OTP", "Code"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP"]
+topics = ["Erlang/OTP"]
 +++
 
 

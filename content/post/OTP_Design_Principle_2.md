@@ -3,8 +3,9 @@ title = "9 OTP设计原则——第二部分"
 date = "2016-11-20T04:14:10+08:00"
 draft = true
 description = "OTP Design Priciple"
-tags = ["Erlang/OTP", "translation"]
-topics = ["Erlang/OTP", "translation"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "翻译文章"]
+topics = ["Erlang/OTP"]
 +++
 
 
@@ -42,13 +43,17 @@ gen_statem行为模式支持两种回调模型：
 * state_functions模型，每个状态转移都用单独Erlang函数实现，产生如下转换:
 
 ```
-StateName(EventType, EventContent, Data) ->    .. code for actions here ...    {next_state, NewStateName, NewData}.
+StateName(EventType, EventContent, Data) ->
+    .. code for actions here ...
+    {next_state, NewStateName, NewData}.
 ```
 
 * handle_event_function模型，仅用一个函数实现所有状态转移规则：
 
 ```
-handle_event(EventType, EventContent, State, Data) ->    .. code for actions here ...    {next_state, NewState, NewData}
+handle_event(EventType, EventContent, State, Data) ->
+    .. code for actions here ...
+    {next_state, NewState, NewData}
 ```
 
 两种模型都可以返回其它元组，查看 *gen_statem* 的man page页面 *Module:StateName/3* 相关内容。其它返回值能产生不同效果，例如，停止状态机、状态机执行状态转移行为以及发送响应等。
@@ -78,17 +83,54 @@ handle_event(EventType, EventContent, State, Data) ->    .. code for actions he
 这个密码门状态机可以用gen_statem编写，下面是回调模块代码：
 
 ```
--module(code_lock).-behaviour(gen_statem).-define(NAME, code_lock).-export([start_link/1]).-export([button/1]).
+-module(code_lock).
+-behaviour(gen_statem).
+-define(NAME, code_lock).
+-export([start_link/1]).
+-export([button/1]).
 
--export([init/1,callback_mode/0,terminate/3,code_change/4]).-export([locked/3,open/3]).
-start_link(Code) ->    gen_statem:start_link({local,?NAME}, ?MODULE, Code, []).button(Digit) ->    gen_statem:cast(?NAME, {button,Digit}).
-init(Code) ->    do_lock(),    Data = #{code => Code, remaining => Code},    {ok,locked,Data}.
-callback_mode() ->    state_functions.
-locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->    case Remaining of        [Digit] -> 
+-export([init/1,callback_mode/0,terminate/3,code_change/4]).
+-export([locked/3,open/3]).
+
+start_link(Code) ->
+    gen_statem:start_link({local,?NAME}, ?MODULE, Code, []).
+button(Digit) ->
+    gen_statem:cast(?NAME, {button,Digit}).
+
+init(Code) ->
+    do_lock(),
+    Data = #{code => Code, remaining => Code},
+    {ok,locked,Data}.
+
+callback_mode() ->
+    state_functions.
+
+locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->
+    case Remaining of
+        [Digit] -> 
             do_unlock(),
-            {next_state,open,Data#{remaining := Code},10000};        [Digit|Rest] -> % Incomplete            {next_state,locked,Data#{remaining := Rest}};        _Wrong ->            {next_state,locked,Data#{remaining := Code}}
-    end.open(timeout, _,  Data) ->    do_lock(),    {next_state,locked,Data};open(cast, {button,_}, Data) ->    do_lock(),    {next_state,locked,Data}.do_lock() ->    io:format("Lock~n", []).do_unlock() ->    io:format("Unlock~n", []).
-terminate(_Reason, State, _Data) ->    State =/= locked andalso do_lock(),    ok.code_change(_Vsn, State, Data, _Extra) ->    {ok,State,Data}.
+            {next_state,open,Data#{remaining := Code},10000};
+        [Digit|Rest] -> % Incomplete
+            {next_state,locked,Data#{remaining := Rest}};
+        _Wrong ->
+            {next_state,locked,Data#{remaining := Code}}
+    end.
+open(timeout, _,  Data) ->
+    do_lock(),
+    {next_state,locked,Data};
+open(cast, {button,_}, Data) ->
+    do_lock(),
+    {next_state,locked,Data}.
+do_lock() ->
+    io:format("Lock~n", []).
+do_unlock() ->
+    io:format("Unlock~n", []).
+
+terminate(_Reason, State, _Data) ->
+    State =/= locked andalso do_lock(),
+    ok.
+code_change(_Vsn, State, Data, _Extra) ->
+    {ok,State,Data}.
 ```
 
 这段代码会在下面小节介绍。
@@ -112,7 +154,10 @@ start_link通过调用gen_statem:start_link/4，创建并链接一个新的gen_s
 如果进程名注册成功，新的gen_statem进程会调用回调函数code_lock:init(Code)，init应当返回{ok, State, Data}，State是gen_statem进程的初始状态。这个例子中是 *locked* ，假设门刚开始处于锁状态。Data是gen_statem的内部状态。这个例子中，状态数据是一个map，code存储正确的按钮序列，remaining存储剩余所需的正确序列（开始时是完整密码Code）。
 
 ```
-init(Code) ->    do_lock(),    Data = #{code => Code, remaining => Code},    {ok,locked,Data}.
+init(Code) ->
+    do_lock(),
+    Data = #{code => Code, remaining => Code},
+    {ok,locked,Data}.
 ```
 
 gen_statem:start_link是同步调用。gen_statem进程初始化成功并准备好接收通知时才会返回。
@@ -122,7 +167,8 @@ gen_statem:start_link是同步调用。gen_statem进程初始化成功并准备�
 函数 *Module:callback_mode/0* 返回模块使用的回调模式，这个例子中是state_functions，每种状态有自己的处理函数。
 
 ```
-callback_mode() ->    state_functions.
+callback_mode() ->
+    state_functions.
 ```
 
 
@@ -140,11 +186,22 @@ button(Digit) ->
 这个事件会产生一条消息，并发送给gen_statem框架。当事件到达时，gen_statem框架调用StateName(cast, Event, Data)，并期待返回{next_state, NewStateName, NewData}。StateName是当前状态，NewStateName是下一个状态。NewData是gen_statem的新状态数据。
 
 ```
-locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->    case Remaining of        [Digit] -> 
+locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->
+    case Remaining of
+        [Digit] -> 
             do_unlock(),
-            {next_state,open,Data#{remaining := Code},10000};        [Digit|Rest] -> % Incomplete            {next_state,locked,Data#{remaining := Rest}};        _Wrong ->            {next_state,locked,Data#{remaining := Code}}
+            {next_state,open,Data#{remaining := Code},10000};
+        [Digit|Rest] -> % Incomplete
+            {next_state,locked,Data#{remaining := Rest}};
+        _Wrong ->
+            {next_state,locked,Data#{remaining := Code}}
     end.
-open(timeout, _, Data) ->    do_lock(),    {next_state,locked,Data};open(cast, {button,_}, Data) ->    do_lock(),    {next_state,locked,Data}.
+open(timeout, _, Data) ->
+    do_lock(),
+    {next_state,locked,Data};
+open(cast, {button,_}, Data) ->
+    do_lock(),
+    {next_state,locked,Data}.
 ```
 
 如果门处于锁状态，按钮按下，完整的按钮序列会和正确密码比较，根据比较结果，门会打开——导致gen_statem状态变成open，或者维持locked状态。
@@ -174,8 +231,27 @@ open(timeout, _, Data) ->
 假设 *code_length/0* 函数返回正确密码的长度(that should not be sensitive to reveal)。我们用handle_event/3函数处理没有明确状态的事件。
 
 ```
-...-export([button/1,code_length/0])....
-code_length() ->    gen_statem:call(?NAME, code_length)....locked(...) -> ... ;locked(EventType, EventContent, Data) ->    handle_event(EventType, EventContent, Data)....open(...) -> ... ;open(EventType, EventContent, Data) ->    handle_event(EventType, EventContent, Data).handle_event({call,From}, code_length, #{code := Code} = Data) ->    {keep_state,Data,[{reply,From,length(Code)}]}.
+...
+-export([button/1,code_length/0]).
+...
+
+code_length() ->
+    gen_statem:call(?NAME, code_length).
+
+...
+
+locked(...) -> ... ;
+
+locked(EventType, EventContent, Data) ->
+    handle_event(EventType, EventContent, Data).
+...
+
+open(...) -> ... ;
+open(EventType, EventContent, Data) ->
+    handle_event(EventType, EventContent, Data).
+
+handle_event({call,From}, code_length, #{code := Code} = Data) ->
+    {keep_state,Data,[{reply,From,length(Code)}]}.
 ```
 
 这个例子调用gen_statem:call/2，并等待服务器响应。这个响应返回{keep_state, ... }元组，有以{reply, From, Reply}元组组成的响应列表。
@@ -185,9 +261,15 @@ open(timeout, _, Data) ->
 如果使用handle_event_function模式，所有事件都在 *Module:handle_event/4* 中处理，我们可以（不一定非得）以事件为中心，类似我们刚开始以事件和状态分支：
 
 ```
-...-export([handle_event/4])....
-callback_mode() ->    handle_event_function.
-handle_event(cast, {button,Digit}, State, #{code := Code} = Data) ->    case State of
+...
+-export([handle_event/4]).
+...
+
+callback_mode() ->
+    handle_event_function.
+
+handle_event(cast, {button,Digit}, State, #{code := Code} = Data) ->
+    case State of
     	locked ->
     		case maps:get(remaining, Data) of
     			[Digit] -> % Complete
@@ -196,9 +278,16 @@ open(timeout, _, Data) ->
     			[Digit|Rest] -> % Incomplete
     				{keep_state,Data#{remaining := Rest}};
     			[_|_] -> % Wrong
-    				{keep_state,Data#{remaining := Code}}    		end;
-    	open ->     		do_lock(),     		{next_state,locked,Data}    	end;
-    	handle_event(timeout, _, open, Data) ->    do_lock(),    {next_state,locked,Data}.
+    				{keep_state,Data#{remaining := Code}}
+    		end;
+    	open ->
+     		do_lock(),
+     		{next_state,locked,Data}
+    	end;
+    	
+handle_event(timeout, _, open, Data) ->
+    do_lock(),
+    {next_state,locked,Data}.
 ...
 ```
 
@@ -220,7 +309,9 @@ init(Args) ->
 这个例子中，函数 *terminate/3* 会在open状态时给门上锁，这样当监控树终止时门不会保持打开状态：
 
 ```
-terminate(_Reason, State, _Data) ->    State =/= locked andalso do_lock(),    ok.
+terminate(_Reason, State, _Data) ->
+    State =/= locked andalso do_lock(),
+    ok.
 ```
 
 ###### 独立gen_fsm进程
@@ -228,7 +319,10 @@ terminate(_Reason, State, _Data) ->    State =/= locked andalso do_lock(),    
 如果gen_statem不在监控树中，要用到gen_statem:stop停止函数，这是一个系统API。例子：
 
 ```
-...-export([start_link/1,stop/0]).... stop() ->    gen_statem:stop(?NAME).
+...
+-export([start_link/1,stop/0]).
+... stop() ->
+    gen_statem:stop(?NAME).
 ```
 
 gen_statem:stop会让gen_statem框架回调函数terminate/3，类似监控服务器等待进程退出。
@@ -270,11 +364,17 @@ gen_statem:stop会让gen_statem框架回调函数terminate/3，类似监控服�
 
 ```
 ... 
-locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->    case Remaining of        [Digit] -> 
+locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->
+    case Remaining of
+        [Digit] -> 
             do_unlock(),
         	  Tref = erlang:start_timer(10000, self(), lock),
         	  {next_state,open,Data#{remaining := Code, timer := Tref}};
-...open(info, {timeout,Tref,lock}, #{timer := Tref} = Data) ->    do_lock(),    {next_state,locked,Data};open(cast, {button,_}, Data) ->
+...
+open(info, {timeout,Tref,lock}, #{timer := Tref} = Data) ->
+    do_lock(),
+    {next_state,locked,Data};
+open(cast, {button,_}, Data) ->
 	 {keep_state,Data};
 ...
 ```
@@ -313,23 +413,38 @@ open(cast, {button, _}, Data) ->
 Erlang的选择性消息接收让我们能直接用Erlang代码来描述简单状态机。下面是一个简单例子：
 
 ```
--module(code_lock).-define(NAME, code_lock_1).-export([start_link/1,button/1]).
+-module(code_lock).
+-define(NAME, code_lock_1).
+-export([start_link/1,button/1]).
 
-start_link(Code) ->    spawn(fun () -> true = register(?NAME, self()), do_lock(),locked(Code, Code) end).
-button(Digit) ->    ?NAME ! {button,Digit}.
-locked(Code, [Digit|Remaining]) ->    receive
+start_link(Code) ->
+    spawn(fun () -> true = register(?NAME, self()), do_lock(),locked(Code, Code) end).
+
+button(Digit) ->
+    ?NAME ! {button,Digit}.
+
+locked(Code, [Digit|Remaining]) ->
+    receive
     	 {button,Digit} when Remaining =:= [] ->
     	     do_unlock(),
     	     open(Code);
     	 {button,Digit} ->
     	     locked(Code, Remaining);
     	 {button,_} ->
-    	     locked(Code, Code)    end.
-open(Code) ->
+    	     locked(Code, Code)
+    end.
+
+open(Code) ->
     receive
     after 10000 ->
-       do_lock(),       locked(Code, Code)
-    end.do_lock() ->    io:format("Locked~n", []).do_unlock() ->    io:format("Open~n", []).
+       do_lock(),
+       locked(Code, Code)
+    end.
+
+do_lock() ->
+    io:format("Locked~n", []).
+do_unlock() ->
+    io:format("Open~n", []).
 ```
 
 这个例子中的选择性接受消息实际上实现了open到locked状态的延迟处理。
@@ -351,11 +466,35 @@ start_link(Code) ->    spawn(fun () -> true = register(?NAME, self()), do_lock(
 下面是一个使用 *internal* 事件实现entry行为的例子， *enter* 要用到一个辅助函数 *enter/3* ：
 
 ```
-...init(Code) ->    process_flag(trap_exit, true),    Data = #{code => Code},    enter(ok, locked, Data).
-callback_mode() ->    state_functions.locked(internal, enter, _Data) ->    do_lock(),    {keep_state,Data#{remaining => Code}};locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->    case Remaining of        [Digit] ->
-        	   enter(next_state, open, Data);...open(internal, enter, _Data) ->    Tref = erlang:start_timer(10000, self(), lock),    do_unlock(),    {keep_state,Data#{timer => Tref}};open(info, {timeout,Tref,lock}, #{timer := Tref} = Data) ->
+...
+init(Code) ->
+    process_flag(trap_exit, true),
+    Data = #{code => Code},
+    enter(ok, locked, Data).
+
+callback_mode() ->
+    state_functions.
+
+locked(internal, enter, _Data) ->
+    do_lock(),
+    {keep_state,Data#{remaining => Code}};
+
+locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->
+    case Remaining of
+        [Digit] ->
+        	   enter(next_state, open, Data);
+...
+
+open(internal, enter, _Data) ->
+    Tref = erlang:start_timer(10000, self(), lock),
+    do_unlock(),
+    {keep_state,Data#{timer => Tref}};
+
+open(info, {timeout,Tref,lock}, #{timer := Tref} = Data) ->
 	 enter(next_state, locked, Data);
-enter(Tag, State, Data) ->    {Tag,State,Data,[{next_event,internal,enter}]}.
+
+enter(Tag, State, Data) ->
+    {Tag,State,Data,[{next_event,internal,enter}]}.
 ```
 
 ##### 9.4.15 例子回顾
@@ -365,20 +504,76 @@ start_link(Code) ->    spawn(fun () -> true = register(?NAME, self()), do_lock(
 注意这个状态图（没有贴）没有明确open状态时按钮事件如何处理。因此你需要注意有的地方不明确的事件会被忽略但是在其它状态会被处理。此外，状态图没有显示 *code_length/0* 会在每个状态被调用。
 
 ```
--module(code_lock).-behaviour(gen_statem).-define(NAME, code_lock_2).-export([start_link/1,stop/0]).-export([button/1,code_length/0]).-export([init/1,callback_mode/0,terminate/3,code_change/4]).-export([locked/3,open/3]).
-start_link(Code) ->    gen_statem:start_link({local,?NAME}, ?MODULE, Code, []).stop() ->    gen_statem:stop(?NAME).
-button(Digit) ->    gen_statem:cast(?NAME, {button,Digit}).code_length() ->    gen_statem:call(?NAME, code_length).
-init(Code) ->    process_flag(trap_exit, true),    Data = #{code => Code},    enter(ok, locked, Data).
-callback_mode() ->    state_functions.
-locked(internal, enter, #{code := Code} = Data) ->    do_lock(),    {keep_state,Data#{remaining => Code}};locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->    case Remaining of        [Digit] -> % Complete            enter(next_state, open, Data);        [Digit|Rest] -> % Incomplete            {keep_state,Data#{remaining := Rest}};        [_|_] -> % Wrong            {keep_state,Data#{remaining := Code}}    end;locked(EventType, EventContent, Data) ->    handle_event(EventType, EventContent, Data).
-open(internal, enter, Data) ->    Tref = erlang:start_timer(10000, self(), lock),    do_unlock(),    {keep_state,Data#{timer => Tref}};open(info, {timeout,Tref,lock}, #{timer := Tref} = Data) ->    enter(next_state, locked, Data);open(cast, {button,_}, _) ->    {keep_state_and_data,[postpone]};open(EventType, EventContent, Data) ->    handle_event(EventType, EventContent, Data).
+-module(code_lock).
+-behaviour(gen_statem).
+-define(NAME, code_lock_2).
+-export([start_link/1,stop/0]).
+-export([button/1,code_length/0]).
+-export([init/1,callback_mode/0,terminate/3,code_change/4]).
+-export([locked/3,open/3]).
 
-handle_event({call,From}, code_length, #{code := Code}) ->    {keep_state_and_data,[{reply,From,length(Code)}]}.
-enter(Tag, State, Data) ->    {Tag,State,Data,[{next_event,internal,enter}]}.
-do_lock() ->    io:format("Locked~n", []).
-do_unlock() ->    io:format("Open~n", []).
-terminate(_Reason, State, _Data) ->    State =/= locked andalso do_lock(),    ok.
-code_change(_Vsn, State, Data, _Extra) ->    {ok,State,Data}.
+start_link(Code) ->
+    gen_statem:start_link({local,?NAME}, ?MODULE, Code, []).
+stop() ->
+    gen_statem:stop(?NAME).
+
+button(Digit) ->
+    gen_statem:cast(?NAME, {button,Digit}).
+code_length() ->
+    gen_statem:call(?NAME, code_length).
+
+init(Code) ->
+    process_flag(trap_exit, true),
+    Data = #{code => Code},
+    enter(ok, locked, Data).
+
+callback_mode() ->
+    state_functions.
+
+locked(internal, enter, #{code := Code} = Data) ->
+    do_lock(),
+    {keep_state,Data#{remaining => Code}};
+locked(cast, {button,Digit},#{code := Code, remaining := Remaining} = Data) ->
+    case Remaining of
+        [Digit] -> % Complete
+            enter(next_state, open, Data);
+        [Digit|Rest] -> % Incomplete
+            {keep_state,Data#{remaining := Rest}};
+        [_|_] -> % Wrong
+            {keep_state,Data#{remaining := Code}}
+    end;
+locked(EventType, EventContent, Data) ->
+    handle_event(EventType, EventContent, Data).
+
+open(internal, enter, Data) ->
+    Tref = erlang:start_timer(10000, self(), lock),
+    do_unlock(),
+    {keep_state,Data#{timer => Tref}};
+open(info, {timeout,Tref,lock}, #{timer := Tref} = Data) ->
+    enter(next_state, locked, Data);
+open(cast, {button,_}, _) ->
+    {keep_state_and_data,[postpone]};
+open(EventType, EventContent, Data) ->
+    handle_event(EventType, EventContent, Data).
+
+handle_event({call,From}, code_length, #{code := Code}) ->
+    {keep_state_and_data,[{reply,From,length(Code)}]}.
+
+enter(Tag, State, Data) ->
+    {Tag,State,Data,[{next_event,internal,enter}]}.
+
+do_lock() ->
+    io:format("Locked~n", []).
+
+do_unlock() ->
+    io:format("Open~n", []).
+
+terminate(_Reason, State, _Data) ->
+    State =/= locked andalso do_lock(),
+    ok.
+
+code_change(_Vsn, State, Data, _Extra) ->
+    {ok,State,Data}.
 ```
 
 ###### 回调模式：handle_event_function
@@ -386,12 +581,41 @@ handle_event({call,From}, code_length, #{code := Code}) ->    {keep_state_and_d
 这一章节描述使用一个 *handle_event/4* 函数处理事件。之前根据事件处理分支的例子不能完成我们的目标因为有entry行为。因此这个例子根据状态做分支处理：
 
 ```
-...-export([handle_event/4])....callback_mode() ->    handle_event_function.
-%% State: lockedhandle_event(internal, enter, locked, #{code := Code} = Data) ->
-    do_lock(),    {keep_state,Data#{remaining => Code}};handle_event(cast, {button,Digit}, locked, #{code := Code, remaining := Remaining} = Data) ->    case Remaining of        [Digit] -> % Complete            enter(next_state, open, Data);        [Digit|Rest] -> % Incomplete            {keep_state,Data#{remaining := Rest}};        [_|_] -> % Wrong            {keep_state,Data#{remaining := Code}}
+...
+-export([handle_event/4]).
+...
+
+callback_mode() ->
+    handle_event_function.
+
+%% State: locked
+handle_event(internal, enter, locked, #{code := Code} = Data) ->
+    do_lock(),
+    {keep_state,Data#{remaining => Code}};
+handle_event(cast, {button,Digit}, locked, #{code := Code, remaining := Remaining} = Data) ->
+    case Remaining of
+        [Digit] -> % Complete
+            enter(next_state, open, Data);
+        [Digit|Rest] -> % Incomplete
+            {keep_state,Data#{remaining := Rest}};
+        [_|_] -> % Wrong
+            {keep_state,Data#{remaining := Code}}
     end;
-%% State: openhandle_event(internal, enter, open, Data) ->    Tref = erlang:start_timer(10000, self(), lock),    do_unlock(),    {keep_state,Data#{timer => Tref}};handle_event(info, {timeout,Tref,lock}, open, #{timer := Tref} = Data) ->    enter(next_state, locked, Data);handle_event(cast, {button,_}, open, _) ->
-    {keep_state_and_data,[postpone]};%% Any statehandle_event({call,From}, code_length, _State, #{code := Code}) ->    {keep_state_and_data,[{reply,From,length(Code)}]}....
+
+%% State: open
+handle_event(internal, enter, open, Data) ->
+    Tref = erlang:start_timer(10000, self(), lock),
+    do_unlock(),
+    {keep_state,Data#{timer => Tref}};
+handle_event(info, {timeout,Tref,lock}, open, #{timer := Tref} = Data) ->
+    enter(next_state, locked, Data);
+handle_event(cast, {button,_}, open, _) ->
+    {keep_state_and_data,[postpone]};
+
+%% Any state
+handle_event({call,From}, code_length, _State, #{code := Code}) ->
+    {keep_state_and_data,[{reply,From,length(Code)}]}.
+...
 ```
 
 ##### 9.4.16 过滤状态
@@ -405,12 +629,17 @@ handle_event({call,From}, code_length, #{code := Code}) ->    {keep_state_and_d
 可以通过格式化内部状态，通过调用 *sys:get_status/1,2* 实现 *Module:format_status/2* ，例如下面的代码：
 
 ```
-...-export([init/1,terminate/3,code_change/4,format_status/2])....format_status(Opt, [_PDict,State,Data]) ->    StateData = {State, maps:filter(
+...
+-export([init/1,terminate/3,code_change/4,format_status/2]).
+...
+format_status(Opt, [_PDict,State,Data]) ->
+    StateData = {State, maps:filter(
     							fun (code, _) -> false; 
     							    (remaining, _) -> false; 
     							    (_, _) -> true 
     							end,
-    							Data)},    case Opt of
+    							Data)},
+    case Opt of
         terminate ->
             StateData;
         normal ->
@@ -435,40 +664,101 @@ format_status并不是强制实现的，如果没有，默认实现类似这个�
 我们定义状态{StateName, LockButton}, StateName是之前的锁按钮，LockButton是新的锁按钮：
 
 ```
--module(code_lock).-behaviour(gen_statem).-define(NAME, code_lock_3).-export([start_link/2,stop/0]).-export([button/1,code_length/0,set_lock_button/1]).-export([init/1,callback_mode/0,terminate/3,code_change/4,format_status/2]).-export([handle_event/4]).
-start_link(Code, LockButton) ->
+-module(code_lock).
+-behaviour(gen_statem).
+-define(NAME, code_lock_3).
+-export([start_link/2,stop/0]).
+-export([button/1,code_length/0,set_lock_button/1]).
+-export([init/1,callback_mode/0,terminate/3,code_change/4,format_status/2]).
+-export([handle_event/4]).
+
+start_link(Code, LockButton) ->
     gen_statem:start_link({local,?NAME}, ?MODULE, {Code,LockButton}, []).
-    stop() ->    gen_statem:stop(?NAME).
-    button(Digit) ->    gen_statem:call(?NAME, {button,Digit}).
-    code_length() ->    gen_statem:call(?NAME, code_length).
-    set_lock_button(LockButton) ->    gen_statem:call(?NAME, {set_lock_button,LockButton}).
-init({Code,LockButton}) ->    process_flag(trap_exit, true),    Data = #{code => Code, remaining => undefined, timer => undefined},    enter(ok, {locked,LockButton}, Data, []).
-callback_mode() ->    handle_event_function.
-handle_event({call,From}, {set_lock_button,NewLockButton},{StateName,OldLockButton}, Data) ->
-    {next_state,{StateName,NewLockButton},Data,[{reply,From,OldLockButton}]};handle_event({call,From}, code_length,{_StateName,_LockButton}, #{code := Code}) ->    {keep_state_and_data,[{reply,From,length(Code)}]};handle_event(EventType, EventContent,{locked,LockButton}, #{code := Code, remaining := Remaining} = Data) ->    case {EventType,EventContent} of
+    
+stop() ->
+    gen_statem:stop(?NAME).
+    
+button(Digit) ->
+    gen_statem:call(?NAME, {button,Digit}).
+    
+code_length() ->
+    gen_statem:call(?NAME, code_length).
+    
+set_lock_button(LockButton) ->
+    gen_statem:call(?NAME, {set_lock_button,LockButton}).
+
+init({Code,LockButton}) ->
+    process_flag(trap_exit, true),
+    Data = #{code => Code, remaining => undefined, timer => undefined},
+    enter(ok, {locked,LockButton}, Data, []).
+
+callback_mode() ->
+    handle_event_function.
+
+handle_event({call,From}, {set_lock_button,NewLockButton},{StateName,OldLockButton}, Data) ->
+    {next_state,{StateName,NewLockButton},Data,[{reply,From,OldLockButton}]};
+handle_event({call,From}, code_length,{_StateName,_LockButton}, #{code := Code}) ->
+    {keep_state_and_data,[{reply,From,length(Code)}]};
+handle_event(EventType, EventContent,{locked,LockButton}, #{code := Code, remaining := Remaining} = Data) ->
+    case {EventType,EventContent} of
         {internal,enter} ->
-            do_lock(),            {keep_state,Data#{remaining := Code}};
+            do_lock(),
+            {keep_state,Data#{remaining := Code}};
         {{call,From},{button,Digit}} ->
-            case Remaining of                [Digit] -> % Complete
-                    next_state({open,LockButton}, Data,[{reply,From,ok}]);                [Digit|Rest] -> % Incomplete                    {keep_state,Data#{remaining := Rest},
+            case Remaining of
+                [Digit] -> % Complete
+                    next_state({open,LockButton}, Data,[{reply,From,ok}]);
+                [Digit|Rest] -> % Incomplete
+                    {keep_state,Data#{remaining := Rest},
                     [{reply,From,ok}]};
                 [_|_] -> % Wrong
                     {keep_state,Data#{remaining := Code},[{reply,From,ok}]}
             end 
-    end;handle_event(EventType, EventContent,{open,LockButton}, #{timer := Timer} = Data) ->    case {EventType,EventContent} of
-        {internal,enter} ->            Tref = erlang:start_timer(10000, self(), lock),
-            do_unlock(),            {keep_state,Data#{timer := Tref}};
+    end;
+handle_event(EventType, EventContent,{open,LockButton}, #{timer := Timer} = Data) ->
+    case {EventType,EventContent} of
+        {internal,enter} ->
+            Tref = erlang:start_timer(10000, self(), lock),
+            do_unlock(),
+            {keep_state,Data#{timer := Tref}};
         {info,{timeout,Timer,lock}} ->
             next_state({locked,LockButton}, Data, []);
         {{call,From},{button,Digit}} ->
             if
                 Digit =:= LockButton ->
                     erlang:cancel_timer(Timer),
-                    next_state({locked,LockButton}, Data,[{reply,From,locked}]);                true ->                    {keep_state_and_data,[postpone]}            end 
-    end.next_state(State, Data, Actions) ->    enter(next_state, State, Data, Actions).enter(Tag, State, Data, Actions) ->    {Tag,State,Data,[{next_event,internal,enter}|Actions]}.do_lock() ->    io:format("Locked~n", []).do_unlock() ->    io:format("Open~n", []).terminate(_Reason, State, _Data) ->    State =/= locked andalso do_lock(),    ok.code_change(_Vsn, State, Data, _Extra) ->    {ok,State,Data}.
-format_status(Opt, [_PDict,State,Data]) ->    StateData = {State, maps:filter(
-                            fun (code, _) -> false;                                (remaining, _) -> false;                                (_, _) -> true
-                            end,                        Data)},    case Opt of        terminate ->            StateData;        normal ->            [{data,[{"State",StateData}]}]    end.
+                    next_state({locked,LockButton}, Data,[{reply,From,locked}]);
+                true ->
+                    {keep_state_and_data,[postpone]}
+            end 
+    end.
+next_state(State, Data, Actions) ->
+    enter(next_state, State, Data, Actions).
+enter(Tag, State, Data, Actions) ->
+    {Tag,State,Data,[{next_event,internal,enter}|Actions]}.
+do_lock() ->
+    io:format("Locked~n", []).
+do_unlock() ->
+    io:format("Open~n", []).
+terminate(_Reason, State, _Data) ->
+    State =/= locked andalso do_lock(),
+    ok.
+code_change(_Vsn, State, Data, _Extra) ->
+    {ok,State,Data}.
+
+format_status(Opt, [_PDict,State,Data]) ->
+    StateData = {State, maps:filter(
+                            fun (code, _) -> false;
+                                (remaining, _) -> false;
+                                (_, _) -> true
+                            end,
+                        Data)},
+    case Opt of
+        terminate ->
+            StateData;
+        normal ->
+            [{data,[{"State",StateData}]}]
+    end.
 ```
 
 对于物理密码锁这不是合适的模型，因为button回挂起直到锁被锁上，但是对于通用API来说这并不少见。
@@ -482,7 +772,13 @@ format_status并不是强制实现的，如果没有，默认实现类似这个�
 这个例子我们在{open,_}状态休眠，因为正常情况下直到超时转移到{locked,}状态：
 
 ```
-handle_event(    EventType, EventContent,    {open,LockButton}, #{timer := Timer} = Data) ->        case {EventType,EventContent} of            {internal,enter} ->                Tref = erlang:start_timer(10000, self(), lock),                do_unlock(),
+handle_event(
+    EventType, EventContent,
+    {open,LockButton}, #{timer := Timer} = Data) ->
+        case {EventType,EventContent} of
+            {internal,enter} ->
+                Tref = erlang:start_timer(10000, self(), lock),
+                do_unlock(),
                 {keep_state,Data#{timer := Tref},[hibernate]};
 ```
 

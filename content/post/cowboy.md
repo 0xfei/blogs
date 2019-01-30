@@ -3,11 +3,12 @@ date = "2016-12-15T00:10:44+08:00"
 title = "Erlang HTTP服务器cowboy"
 draft = true
 description = "Http server cowboy"
-tags = ["Erlang/OTP", "code", "cowboy"]
-topics = ["Erlang/OTP", "code", "cowboy"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "源码分析"]
+topics = ["Erlang/OTP"]
 +++
 
-cowboy是基于[ranch](http://0x01f.com/post/ranch/)的http服务器框架，提供用户自定义路由、REST接口等便利功能。由于ranch是很完善的TCP池，所以在此之上的cowboy代码很容易支持http/https。虽说如此，http毕竟是很复杂的协议，好多细节不参考RFC根本搞不清楚。借此机会详细了解如何实现完整的HTTP服务器。首先了解cowboy完整的流程以及使用方法。
+cowboy是基于[ranch](/post/ranch/)的http服务器框架，提供用户自定义路由、REST接口等便利功能。由于ranch是很完善的TCP池，所以在此之上的cowboy代码很容易支持http/https。虽说如此，http毕竟是很复杂的协议，好多细节不参考RFC根本搞不清楚。借此机会详细了解如何实现完整的HTTP服务器。首先了解cowboy完整的流程以及使用方法。
 
 最简单的例子：
 

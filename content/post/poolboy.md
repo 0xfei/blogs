@@ -3,8 +3,9 @@ title = "poolboy——Erlang进程池"
 date = "2017-01-13T18:24:11+08:00"
 draft = true
 description = "A hunky Erlang worker pool factory"
-tags = ["Erlang/OTP", "poolboy", "Code"]
-topics = ["Erlang/OTP", "poolboy", "Code"]
+categories = ["Erlang/OTP"]
+tags = ["Erlang/OTP", "源码分析"]
+topics = ["Erlang/OTP"]
 +++
 
 [poolboy](https://github.com/devinus/poolboy)是Erlang进程池，应用广泛，代码短小精悍（400行不到）。PostgreSQL的Erlang客户端就用到了poolboy，其他DB库也有用，比如redis等。由于足够简洁，所以坑不少，[这篇文章](https://segmentfault.com/a/1190000002894808)做了总结。任何进程池的目的都是很明确的——预先创建特定数目的进程，执行反复的一次性工作，随后接受直接提供服务。用Erlang实现进程池更是易如反掌，只需要按照OTP规范写一个监控树就行。
