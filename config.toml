@@ -1,8 +1,7 @@
 baseurl = "/"
 languageCode = "en-us"
 title = "0x01f"
-#theme = "detox"
-theme = "beg"
+theme = "detox"
 
 contentdir = "content"
 layoutdir = "layouts"

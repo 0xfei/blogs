@@ -1,6 +1,6 @@
 #!/bin/sh
 
-server="0x01f.com"
+server="0x01f.cn"
 name="root"
 
 ssh $name@$server
