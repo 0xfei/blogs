@@ -1,6 +1,6 @@
 #!/bin/sh
 
-server="root@0x01f.com:/var/www/images/"
+server="root@0x01f.cn:/var/www/images/"
 
 if [ $# == 0 ]; then
 	echo "Usage: uploadpic [file1 file2 ...]"
