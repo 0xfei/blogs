@@ -136,11 +136,11 @@ struct RedisOptData{
 ```
 int good_function(Param* param) 
 {
-    int status = 0;
+    int status = STATUS_OK;
     do {
         if (!check_param(param)) {
-            ERR_LOG(TEXT_CHECK_PARAM_FAIL);
-            status = STATUS_CHECK_PARAM_FAIL;
+            ERR_LOG(TEXT_PARAM_ERROR);
+            status = STATUS_PARAM_ERROR;
             break;
         }
         if (do_thing1(param) != STATUS_OK) {
@@ -230,7 +230,7 @@ int do_work(Param* param)
 
 #### 时刻注意资源释放和错误检查
 
-这没什么好说的，错误检查、new（new会抛异常）完要delete。其实应该放第一条。
+这没什么好说的，错误检查、new（new会抛异常）完要delete、异常时资源回收，可以灵活使用析构函数。其实应该放第一条。
 
 #### 写最短和最高效的代码
 
@@ -277,4 +277,4 @@ if (g_data == NULL) {
 
 有几份代码对我影响很大：WRK、ReactOS和nginx，前两份是Windows内核代码，但是代码特别工整，注释也规范；nginx真的写的很好，不记得有几个函数超过了一屏，而且把函数拎出来基本都能看懂，自洽很重要。
 
-不过真正对成长帮助大的，还是看业务代码，和相关的以来。每个部门都有引以为傲的好代码，我觉得看那些挺好，很容易吸收，也很容易发现问题，一来一回就有进步了。
+不过真正对成长帮助大的，还是看业务代码，和框架依赖。每个部门都有引以为傲的好代码，我觉得看那些挺好，很容易吸收，也很容易发现问题，一来一回就有进步了。
