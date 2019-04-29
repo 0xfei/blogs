@@ -13,6 +13,7 @@ buildFuture = true
 [Params]
 	author = "0x01f"
 	description = "Ma' in wojel ba'ax ka lelo' u k'áat u ya'al"
+  disqusShortname = "0x01f"
 
 [menu]
   [[menu.main]]
